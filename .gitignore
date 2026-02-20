@@ -1,0 +1,13 @@
+# Temporary files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# OS generated files
+ehthumbs.db
+Desktop.ini
+
+# Node modules (if any)
+node_modules/
