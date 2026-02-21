@@ -43,7 +43,7 @@
    If you don't have EF Core Power Tools cli installed, please run the following command to install it.
 
    ```shell
-   dotnet tool update EricEJ.EFCorePowerTools.Cli -g --version `10.*`
+   dotnet tool update ErikEJ.EFCorePowerTools.Cli -g --version `10.*`
    ```
 
 7. Setup C# Global Usings in the project.
