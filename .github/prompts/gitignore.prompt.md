@@ -129,3 +129,5 @@
    > Replace `{template-id}` with the id of the template you selected in step 1.
 
 3. Verify that the `.gitignore` file has been successfully.
+
+Let's do this step by step.
