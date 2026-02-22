@@ -3,8 +3,9 @@
 本儲存庫用於放置與 Copilot 自動化開發相關的設定、範例與輔助檔案。下列為專案根目錄中主要的檔案與資料夾說明：
 
 - `.github/`：GitHub 專案維護相關設定。此資料夾通常包含：
-  - `instructions/`：專案或 agent 的指示檔（例如 Copilot 的自訂指令或運作說明）。
-  - `prompts/`：可重用的 prompt 範本或示例，供自動化或 AI 助手使用。
+  - `agents/`：自訂代理配置檔（例如 code-review 代理提供全面的程式碼審查指導）。
+  - `instructions/`：專案或 agent 的指示檔（例如 Copilot 的自訂指令或運作說明、SvelteKit 編碼指南等）。
+  - `prompts/`：可重用的 prompt 範本或示例（例如 .NET API 控制器建立、EF Core DbContext 初始化、.gitignore 產生等），供自動化或 AI 助手使用。
   - 其他常見子項目：`workflows/`（GitHub Actions）、`ISSUE_TEMPLATE/`（Issue 範本）、`PULL_REQUEST_TEMPLATE.md`（PR 範本）等。
 
 ## 快速上手
