@@ -8,6 +8,7 @@
 .
 ├─ .agents/
 │  └─ skills/
+│     ├─ find-skills/SKILL.md
 │     ├─ svelte-code-writer/SKILL.md
 │     └─ web-design-guidelines/SKILL.md
 ├─ .github/
@@ -49,6 +50,7 @@
   - `copilot-setup-steps.yml`：定義 Copilot agent 啟動前的環境準備步驟（含字型安裝）。
 
 - `.agents/skills/`：Agent Skills 定義（由 Copilot 在對應情境自動載入）。
+  - `find-skills/SKILL.md`：協助搜尋、挑選與安裝可用 skills（`npx skills find/add/check/update`）。
   - `svelte-code-writer/SKILL.md`：透過 `@sveltejs/mcp` CLI 進行 Svelte 文件查詢與程式碼問題檢查。
   - `web-design-guidelines/SKILL.md`：依 Web Interface Guidelines 對 UI/UX 做規範檢查。
 
