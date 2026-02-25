@@ -21,7 +21,7 @@ applyTo: '**/*.svelte, **/*.ts'
 **State Management:**
 
 - Use `$state()` for mutable reactive state
-- Use `$state.frozen()` for immutable state (objects/arrays that should not be deeply reactive)
+- Use `$state.raw()` for immutable state (objects/arrays that should not be deeply reactive)
 - Prefer `$state()` with objects when you need nested reactivity
 - Use private fields (`#field`) in classes for encapsulated state
 
@@ -134,8 +134,13 @@ applyTo: '**/*.svelte, **/*.ts'
 
 - Use `{#key}` blocks to force component re-rendering when needed
 - Avoid unnecessary `$effect()` calls - prefer `$derived` for computed values
-- Use `$state.frozen()` for large immutable data structures to reduce reactivity overhead
+- Use `$state.raw()` for large immutable data structures to reduce reactivity overhead
 - Leverage code splitting with dynamic imports for large components
 - Use `import.meta.glob()` with `eager: true` only when all resources are needed immediately
 - Implement lazy loading for images and heavy components
 - Use proper CSS containment (contain property) for performance-critical sections
+
+#### VALIDATION
+
+- After creating or editing any Svelte component (`.svelte`) or module (`.svelte.ts`/`.svelte.js`), run `svelte-autofixer` from the `svelte-code-writer` skill to validate the code
+- Use `npx @sveltejs/mcp svelte-autofixer <file>` to detect common issues before finalizing changes
