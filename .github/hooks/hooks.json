@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "hooks": {
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "powershell": "scripts/log-prompt.ps1",
+        "cwd": ".",
+        "env": {
+          "LOG_LEVEL": "INFO",
+          "LOG_DIR": "logs",
+          "LOG_INCLUDE_PROMPT_CONTENT": "false",
+          "LOG_INCLUDE_RAW_PAYLOAD": "false"
+        }
+      }
+    ]
+  }
+}

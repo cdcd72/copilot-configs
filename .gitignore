@@ -4,6 +4,7 @@ Thumbs.db
 
 # Logs
 *.log
+logs/
 
 # OS generated files
 ehthumbs.db

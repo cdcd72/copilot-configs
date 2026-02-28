@@ -16,6 +16,8 @@
 │  │  ├─ chrome-extension-experts.agent.md
 │  │  ├─ code-review.agent.md
 │  │  └─ svelte-file-editor.agent.md
+│  ├─ hooks/
+│  │  └─ hooks.json
 │  ├─ instructions/
 │  │  └─ svelte.instructions.md
 │  ├─ prompts/
@@ -25,6 +27,8 @@
 │  │  └─ gitignore.prompt.md
 │  └─ workflows/
 │     └─ copilot-setup-steps.yml
+├─ scripts/
+│  └─ log-prompt.ps1
 ├─ skills-lock.json
 ├─ README.md
 └─ LICENSE
@@ -40,6 +44,9 @@
 - `.github/instructions/`：跨任務共用實作規範。
   - `svelte.instructions.md`：Svelte/SvelteKit 開發準則（runes、load 類型、效能、驗證流程等）。
 
+- `.github/hooks/`：GitHub Copilot Hooks 設定。
+  - `hooks.json`：目前註冊 `userPromptSubmitted` 事件，執行 `scripts/log-prompt.ps1` 進行提示記錄。
+
 - `.github/prompts/`：可重用 prompt 範本。
   - `create-controller-base-on-ef-core.prompt.md`：依 EF Core 實體快速產生 Controller。
   - `dotnet-api-init.prompt.md`：初始化 .NET API 專案的標準設定流程。
@@ -48,6 +55,9 @@
 
 - `.github/workflows/`：GitHub Actions 工作流程。
   - `copilot-setup-steps.yml`：定義 Copilot agent 啟動前的環境準備步驟（含字型安裝）。
+
+- `scripts/`：本機腳本。
+  - `log-prompt.ps1`：接收 hook payload，寫入 `logs/prompt_logs.jsonl`，支援等級門檻與敏感欄位開關。
 
 - `.agents/skills/`：Agent Skills 定義（由 Copilot 在對應情境自動載入）。
   - `find-skills/SKILL.md`：協助搜尋、挑選與安裝可用 skills（`npx skills find/add/check/update`）。
@@ -59,16 +69,41 @@
   - `README.md`：本儲存庫導覽與維護說明。
   - `LICENSE`：授權條款。
 
+## Hook 提示記錄設定
+
+目前 `userPromptSubmitted` 事件使用 `scripts/log-prompt.ps1`，可透過 `.github/hooks/hooks.json` 的 `env` 控制：
+
+- `LOG_LEVEL`：記錄門檻，支援 `OFF`、`ERROR`、`WARN`、`INFO`、`DEBUG`。
+- `LOG_DIR`：日誌輸出目錄（預設為 `logs`）。
+- `LOG_INCLUDE_PROMPT_CONTENT`：`true/false`，是否寫入完整 `prompt`。
+- `LOG_INCLUDE_RAW_PAYLOAD`：`true/false`，是否寫入 `rawPayload`。
+
+預設輸出檔案為 `logs/prompt_logs.jsonl`，每行一筆 JSON，常見欄位包含：
+
+- `timestampUtc`
+- `level`
+- `event`
+- `user`
+- `workspace`
+- `promptLength`
+- `promptHash`
+- `promptPreview`
+
+在 `LOG_LEVEL=DEBUG` 時，會額外包含 `debug` 診斷欄位。
+
+> :fire: 建議將 `logs/` 加入 `.gitignore`，避免將提示記錄（可能含敏感內容）提交到版本庫。
+
 ## 快速上手
 
 1. 將專用代理放在 `.github/agents/`。
-2. 將可重用規範放在 `.github/instructions/`。
-3. 將可重用提示放在 `.github/prompts/`。
-4. 以 `skills-lock.json` 管理 skills 來源；新增 skill 後同步更新 lock 檔。
+2. 將鉤子設定放在 `.github/hooks/hooks.json`。
+3. 將可重用規範放在 `.github/instructions/`。
+4. 將可重用提示放在 `.github/prompts/`。
+5. 以 `skills-lock.json` 管理 skills 來源；新增 skill 後同步更新 lock 檔。
 
 ## 維護建議
 
-- 新增/調整 agent、instruction、prompt、skill 後，同步更新本 README 的「目前結構」與說明。
+- 新增/調整 agent、hook、instruction、prompt、skill 後，同步更新本 README 的「目前結構」與說明。
 - 保持 `.github/instructions/*.md` 的 `applyTo` 範圍精準，避免規則誤套用。
 
 ## 貢獻
