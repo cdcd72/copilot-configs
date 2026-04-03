@@ -14,7 +14,6 @@
 │     └─ web-design-guidelines/SKILL.md
 ├─ .github/
 │  ├─ agents/
-│  │  ├─ chrome-extension-experts.agent.md
 │  │  ├─ code-review.agent.md
 │  │  └─ svelte-file-editor.agent.md
 │  ├─ hooks/
@@ -22,9 +21,6 @@
 │  ├─ instructions/
 │  │  └─ svelte.instructions.md
 │  ├─ prompts/
-│  │  ├─ create-controller-base-on-ef-core.prompt.md
-│  │  ├─ dotnet-api-init.prompt.md
-│  │  ├─ ef-core-dbcontext-init.prompt.md
 │  │  └─ gitignore.prompt.md
 │  └─ workflows/
 │     └─ copilot-setup-steps.yml
@@ -38,7 +34,6 @@
 ## 目錄與檔案說明
 
 - `.github/agents/`：自訂 agent 定義。
-  - `chrome-extension-experts.agent.md`：Chrome Extension 開發專家代理，提供 V3 架構、權限策略與常見除錯指引。
   - `code-review.agent.md`：通用程式碼審查代理，聚焦安全性、效能、架構與測試品質。
   - `svelte-file-editor.agent.md`：Svelte 5 編輯/檢查代理，要求搭配 Svelte MCP 文件與 autofixer 驗證。
 
@@ -49,9 +44,6 @@
   - `hooks.json`：目前註冊 `userPromptSubmitted` 事件，執行 `scripts/log-prompt.ps1` 進行提示記錄。
 
 - `.github/prompts/`：可重用 prompt 範本。
-  - `create-controller-base-on-ef-core.prompt.md`：依 EF Core 實體快速產生 Controller。
-  - `dotnet-api-init.prompt.md`：初始化 .NET API 專案的標準設定流程。
-  - `ef-core-dbcontext-init.prompt.md`：初始化 EF Core `DbContext` 與相關設定。
   - `gitignore.prompt.md`：協助建立/調整 `.gitignore` 規則。
 
 - `.github/workflows/`：GitHub Actions 工作流程。
