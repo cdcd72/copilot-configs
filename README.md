@@ -10,6 +10,7 @@
 │  └─ skills/
 │     ├─ find-skills/SKILL.md
 │     ├─ svelte-code-writer/SKILL.md
+│     ├─ svelte-core-bestpractices/SKILL.md
 │     └─ web-design-guidelines/SKILL.md
 ├─ .github/
 │  ├─ agents/
@@ -62,6 +63,7 @@
 - `.agents/skills/`：Agent Skills 定義（由 Copilot 在對應情境自動載入）。
   - `find-skills/SKILL.md`：協助搜尋、挑選與安裝可用 skills（`npx skills find/add/check/update`）。
   - `svelte-code-writer/SKILL.md`：透過 `@sveltejs/mcp` CLI 進行 Svelte 文件查詢與程式碼問題檢查。
+  - `svelte-core-bestpractices/SKILL.md`：提供 Svelte 核心最佳實踐指南。
   - `web-design-guidelines/SKILL.md`：依 Web Interface Guidelines 對 UI/UX 做規範檢查。
 
 - 根目錄檔案：
