@@ -8,6 +8,7 @@
 .
 ├─ .agents/
 │  └─ skills/
+|     ├─ doc-coauthoring/SKILL.md
 │     ├─ find-skills/SKILL.md
 │     ├─ svelte-code-writer/SKILL.md
 │     ├─ svelte-core-bestpractices/SKILL.md
@@ -53,6 +54,7 @@
   - `log-prompt.ps1`：接收 hook payload，寫入 `logs/prompt_logs.jsonl`，支援等級門檻與敏感欄位開關。
 
 - `.agents/skills/`：Agent Skills 定義（由 Copilot 在對應情境自動載入）。
+  - `doc-coauthoring/SKILL.md`：協助撰寫與共同編輯文件、提案、技術規格與決策文件。
   - `find-skills/SKILL.md`：協助搜尋、挑選與安裝可用 skills（`npx skills find/add/check/update`）。
   - `svelte-code-writer/SKILL.md`：透過 `@sveltejs/mcp` CLI 進行 Svelte 文件查詢與程式碼問題檢查。
   - `svelte-core-bestpractices/SKILL.md`：提供 Svelte 核心最佳實踐指南。
