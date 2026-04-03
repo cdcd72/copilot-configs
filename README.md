@@ -8,19 +8,14 @@
 .
 ├─ .agents/
 │  └─ skills/
-│     ├─ find-skills/SKILL.md
-│     ├─ svelte-code-writer/SKILL.md
-│     ├─ svelte-core-bestpractices/SKILL.md
-│     └─ web-design-guidelines/SKILL.md
+│     └─ find-skills/SKILL.md
 ├─ .github/
 │  ├─ agents/
-│  │  ├─ chrome-extension-experts.agent.md
-│  │  ├─ code-review.agent.md
-│  │  └─ svelte-file-editor.agent.md
+│  │  └─ code-review.agent.md
 │  ├─ hooks/
 │  │  └─ hooks.json
 │  ├─ instructions/
-│  │  └─ svelte.instructions.md
+│  │  └─ (None yet)
 │  ├─ prompts/
 │  │  ├─ create-controller-base-on-ef-core.prompt.md
 │  │  ├─ dotnet-api-init.prompt.md
@@ -38,12 +33,10 @@
 ## 目錄與檔案說明
 
 - `.github/agents/`：自訂 agent 定義。
-  - `chrome-extension-experts.agent.md`：Chrome Extension 開發專家代理，提供 V3 架構、權限策略與常見除錯指引。
   - `code-review.agent.md`：通用程式碼審查代理，聚焦安全性、效能、架構與測試品質。
-  - `svelte-file-editor.agent.md`：Svelte 5 編輯/檢查代理，要求搭配 Svelte MCP 文件與 autofixer 驗證。
 
 - `.github/instructions/`：跨任務共用實作規範。
-  - `svelte.instructions.md`：Svelte/SvelteKit 開發準則（runes、load 類型、效能、驗證流程等）。
+  - `(None yet)`：目前尚無共用實作規範。
 
 - `.github/hooks/`：GitHub Copilot Hooks 設定。
   - `hooks.json`：目前註冊 `userPromptSubmitted` 事件，執行 `scripts/log-prompt.ps1` 進行提示記錄。
@@ -62,9 +55,6 @@
 
 - `.agents/skills/`：Agent Skills 定義（由 Copilot 在對應情境自動載入）。
   - `find-skills/SKILL.md`：協助搜尋、挑選與安裝可用 skills（`npx skills find/add/check/update`）。
-  - `svelte-code-writer/SKILL.md`：透過 `@sveltejs/mcp` CLI 進行 Svelte 文件查詢與程式碼問題檢查。
-  - `svelte-core-bestpractices/SKILL.md`：提供 Svelte 核心最佳實踐指南。
-  - `web-design-guidelines/SKILL.md`：依 Web Interface Guidelines 對 UI/UX 做規範檢查。
 
 - 根目錄檔案：
   - `skills-lock.json`：鎖定 skills 來源與 hash，確保技能版本一致。
