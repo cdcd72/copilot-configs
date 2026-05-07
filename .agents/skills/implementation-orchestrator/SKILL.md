@@ -1,6 +1,6 @@
 ---
 name: implementation-orchestrator
-description: orchestrate engineering implementation work from context collection and implementation planning through human review gates, task decomposition, execution brief generation, QA verification, and final delivery artifacts. use when the user asks to plan or coordinate a software implementation task, convert a Jira/GitHub/MR request into an executable plan, split complex engineering work into low-coupling subtasks, prepare prompts for coding agents, verify implementation completeness, or generate final MR descriptions and Jira comments as end-of-work artifacts.
+description: orchestrate engineering implementation planning from user-provided context into reviewable plans, complexity assessment, task breakdowns, execution briefs for coding agents, QA verification, and final delivery artifacts. use when the user wants to turn a software task, tracked issue, review request, bug report, feature request, refactor, or technical change into an implementation plan; split implementation work into delegated coding-agent tasks; or validate completed implementation work before delivery.
 ---
 
 # Implementation Orchestrator
@@ -9,12 +9,12 @@ description: orchestrate engineering implementation work from context collection
 
 Use this skill to turn user-provided engineering context into a controlled, reviewable implementation plan. Prioritize understanding the available context, defining a feasible plan, decomposing the work into low-coupling implementation tasks, and preparing execution-ready briefs for coding agents or human executors.
 
-This skill owns the planning and coordination flow. It may produce execution briefs for delegated implementation work, but delegation applies to implementation workstreams, not to the skill's orchestration responsibilities. After the delegated implementation tasks are reported as complete, use this skill to consolidate the results, verify them against the approved plan and QA criteria, and then produce final MR/Jira artifacts when needed.
+This skill owns the planning and coordination flow. It may produce execution briefs for delegated implementation work, but delegation applies to implementation workstreams, not to the skill's orchestration responsibilities. After the delegated implementation tasks are reported as complete, use this skill to consolidate the results, verify them against the approved plan and QA criteria, and then produce final delivery artifacts when needed.
 
 ## Core Principles
 
 - Treat the implementation plan as the primary output of the planning phase.
-- Treat MR descriptions and Jira comments as final byproducts, not as the main workflow.
+- Treat delivery summaries and status-update comments as final byproducts, not as the main workflow.
 - Do not generate execution briefs before producing a context pack and an implementation plan.
 - Keep human review gates explicit. Non-trivial tasks should pause for user confirmation after context collection, after the initial implementation plan, and after QA verification.
 - Prefer fewer, clearer artifacts over many loosely related notes.
@@ -40,10 +40,10 @@ Collect the task objective and all available source material.
 
 Look for:
 
-- User request or Jira issue summary
+- User request, issue, ticket, or task summary
 - Business or product intent
 - Current behavior and expected behavior
-- Relevant repositories, branches, files, logs, docs, tickets, existing MRs, or screenshots
+- Relevant repositories, branches, files, logs, docs, tickets, existing review requests, or screenshots
 - Known constraints, deadlines, compatibility requirements, rollout expectations, and testing expectations
 - User preferences regarding models, tools, or execution style
 
@@ -406,7 +406,7 @@ Execution briefs should avoid unrelated context. Keep them executable and tightl
 
 Define `qa-checklist.md` during planning so the execution briefs have clear validation expectations. Do not enter the active verification phase until implementation tasks have been reported as complete or implementation evidence is available.
 
-Acceptable implementation evidence includes code diffs, commits, MR links, test results, logs, screenshots, implementation summaries, or coding agent handoff notes.
+Acceptable implementation evidence includes code diffs, commits, review links, test results, logs, screenshots, implementation summaries, or coding agent handoff notes.
 
 Low complexity tasks may be verified by the same assistant after implementation. Medium or high complexity tasks should include a QA consolidation step that compares all completed workstreams against the approved plan, task breakdown, and QA criteria.
 
@@ -489,13 +489,13 @@ Default structure:
 [Yes / No, with rationale]
 ```
 
-Human review gate: for tasks with meaningful scope or risk, ask the user to confirm the final verification before producing polished MR/Jira artifacts.
+Human review gate: for tasks with meaningful scope or risk, ask the user to confirm the final verification before producing polished delivery artifacts.
 
 ### 9. Final Delivery Artifacts
 
 Only after final verification should the following byproducts be generated.
 
-#### `mr-description.md`
+#### `delivery-summary.md`
 
 ```markdown
 # Summary
@@ -514,16 +514,16 @@ Only after final verification should the following byproducts be generated.
 
 - [Risk level and impacted areas]
 
-# Related Jira
+# Related Issue / Ticket
 
-- [Ticket link/key if available]
+- [Ticket, issue, or work item link/key if available]
 
 # Follow-ups
 
 - [Follow-up items if any]
 ```
 
-#### `jira-comment.md`
+#### `status-update.md`
 
 ```markdown
 Completed:
@@ -547,7 +547,7 @@ Follow-ups:
 - [Items requiring follow-up]
 ```
 
-Jira comments should stay concise and status-oriented. Do not paste the full implementation plan into Jira unless explicitly requested.
+Status-update comments should stay concise and status-oriented. Do not paste the full implementation plan into the target tracking system unless explicitly requested.
 
 ## Plan Update Rules
 
@@ -582,7 +582,7 @@ Please confirm whether this implementation plan can be used as the execution bas
 ```
 
 ```text
-Please confirm the final verification results. Once confirmed, I will generate the MR description and Jira comment.
+Please confirm the final verification results. Once confirmed, I will generate the delivery summary and status-update comment.
 ```
 
 ## Quality Bar
@@ -596,4 +596,4 @@ Before considering orchestration complete, verify that:
 - Execution briefs are tightly scoped and include validation instructions.
 - Verification occurs after implementation completion evidence is available.
 - The QA checklist maps back to acceptance criteria.
-- Final MR/Jira artifacts are derived from verified facts, not assumptions.
+- Final delivery artifacts are derived from verified facts, not assumptions.
