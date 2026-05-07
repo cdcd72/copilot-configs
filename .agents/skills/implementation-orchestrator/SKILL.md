@@ -171,11 +171,11 @@ Human review gate: ask the user to approve, reject, or revise the implementation
 After the implementation plan draft is created, assess the task complexity before deciding how to execute it. This step is not only a Low / Medium / High label. It is an execution strategy assessment based on four dimensions:
 
 ```text
-Overall Complexity Profile =
-Implementation Complexity
-+ Coordination Complexity
-+ Verification Complexity
-+ Requirement Volatility
+Overall Complexity Profile consists of:
+- Implementation Complexity
+- Coordination Complexity
+- Verification Complexity
+- Requirement Volatility
 ```
 
 Evaluate each dimension separately, then use the resulting profile to decide task decomposition, execution parallelism, verification depth, and human review frequency.
@@ -274,16 +274,18 @@ Use this structure:
 
 ```yaml
 Complexity Profile:
-  implementation_complexity: Low | Medium | High
-  coordination_complexity: Low | Medium | High
-  verification_complexity: Low | Medium | High
-  requirement_volatility: Low | Medium | High
-
-Rationale:
-  implementation_complexity: [Reason]
-  coordination_complexity: [Reason]
-  verification_complexity: [Reason]
-  requirement_volatility: [Reason]
+  implementation_complexity:
+    level: Low | Medium | High
+    rationale: [Reason]
+  coordination_complexity:
+    level: Low | Medium | High
+    rationale: [Reason]
+  verification_complexity:
+    level: Low | Medium | High
+    rationale: [Reason]
+  requirement_volatility:
+    level: Low | Medium | High
+    rationale: [Reason]
 ```
 
 #### 4.6 Routing Rules
@@ -404,7 +406,7 @@ Execution briefs should avoid unrelated context. Keep them executable and tightl
 
 ### 7. QA Verification
 
-Define `qa-checklist.md` during planning so the execution briefs have clear validation expectations. Do not enter the active verification phase until implementation tasks have been reported as complete or implementation evidence is available.
+Define `qa-checklist.md` during planning based on the QA Criteria in the implementation plan, ensuring execution briefs have clear validation expectations. Do not enter the active verification phase until implementation tasks have been reported as complete or implementation evidence is available.
 
 Acceptable implementation evidence includes code diffs, commits, review links, test results, logs, screenshots, implementation summaries, or coding agent handoff notes.
 
