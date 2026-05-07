@@ -1,6 +1,6 @@
 ---
 name: implementation-orchestrator
-description: orchestrate engineering implementation planning from user-provided context into reviewable plans, complexity assessment, task breakdowns, execution briefs for coding agents, QA verification, and final delivery artifacts. use when the user wants to turn a software task, tracked issue, review request, bug report, feature request, refactor, or technical change into an implementation plan; split implementation work into delegated coding-agent tasks; or validate completed implementation work before delivery.
+description: Orchestrate engineering implementation planning from user-provided context into reviewable plans, complexity assessment, task breakdowns, execution briefs for coding agents, QA verification, and final delivery artifacts. use when the user wants to turn a software task, tracked issue, review request, bug report, feature request, refactor, or technical change into an implementation plan; split implementation work into delegated coding-agent tasks; or validate completed implementation work before delivery.
 ---
 
 # Implementation Orchestrator
