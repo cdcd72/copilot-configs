@@ -141,7 +141,7 @@ This artifact must include both the plan itself and the complexity routing that 
 
 Default structure:
 
-```markdown
+````markdown
 # Implementation Plan
 
 ## Goal
@@ -199,34 +199,38 @@ Default structure:
 
 ## Complexity Profile
 
+```yaml
 Complexity Profile:
-implementation_complexity:
-level: Low | Medium | High
-rationale: [Reason]
-coordination_complexity:
-level: Low | Medium | High
-rationale: [Reason]
-verification_complexity:
-level: Low | Medium | High
-rationale: [Reason]
-requirement_volatility:
-level: Low | Medium | High
-rationale: [Reason]
+  implementation_complexity:
+    level: Low | Medium | High
+    rationale: [Reason]
+  coordination_complexity:
+    level: Low | Medium | High
+    rationale: [Reason]
+  verification_complexity:
+    level: Low | Medium | High
+    rationale: [Reason]
+  requirement_volatility:
+    level: Low | Medium | High
+    rationale: [Reason]
+```
 
 ## Recommended Execution Strategy
 
+```yaml
 Recommended Execution Strategy:
-planning_mode: direct | iterative
-task_decomposition: none | light | aggressive
-execution_mode: direct | delegated
-execution_parallelism: none | limited | parallelizable
-verification_mode: focused | consolidated | rigorous
-human_review_frequency: normal | increased | high
+  planning_mode: direct | iterative
+  task_decomposition: none | light | aggressive
+  execution_mode: direct | delegated
+  execution_parallelism: none | limited | parallelizable
+  verification_mode: focused | consolidated | rigorous
+  human_review_frequency: normal | increased | high
+```
 
 ## Plan Version Log
 
 - v1: Initial draft
-```
+````
 
 Required stop: after producing `implementation-plan.md`, ask the user to approve, reject, or revise it. Do not produce `task-breakdown.md`, `execution-briefs.md`, or `qa-checklist.md` until the user explicitly confirms, unless the user explicitly asks to skip review gates.
 
