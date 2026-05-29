@@ -497,6 +497,10 @@ Human review gate: for tasks with meaningful scope or risk, ask the user to conf
 
 Only after final verification should the following byproducts be generated.
 
+`delivery-summary.md` is intended to be pasted into a merge request / pull request description. It should be review-oriented and include enough technical context for code reviewers.
+
+`status-update.md` is intended to be pasted as a Jira / ticket comment. It should be concise, status-oriented, and readable by non-implementation stakeholders.
+
 #### `delivery-summary.md`
 
 ```markdown
@@ -549,7 +553,7 @@ Follow-ups:
 - [Items requiring follow-up]
 ```
 
-Status-update comments should stay concise and status-oriented. Do not paste the full implementation plan into the target tracking system unless explicitly requested.
+Status-update comments should stay concise and status-oriented for Jira / ticket comments. Do not paste the full implementation plan into the target tracking system unless explicitly requested.
 
 ## Plan Update Rules
 
