@@ -19,12 +19,45 @@ This skill owns the planning and coordination flow. It may produce execution bri
 - Keep human review gates explicit. Non-trivial tasks should pause for user confirmation after context collection, after the initial implementation plan, and after QA verification.
 - Prefer fewer, clearer artifacts over many loosely related notes.
 - Keep delegated implementation tasks low-coupling. Each task should have explicit inputs, expected outputs, ownership boundaries, and validation criteria.
-- Delegate implementation work only after the plan has been reviewed or is sufficiently clear to execute.
+- Delegate implementation work only after the implementation plan has been explicitly approved, unless the user explicitly asks to skip review gates.
 - For low-complexity tasks, the assistant may execute implementation directly only when it has direct access to the required codebase, editing tools, and validation commands.
 - For medium or high complexity tasks, or when direct implementation access is unavailable, stop after producing execution briefs and wait for the user, human executor, or coding agent to provide implementation results.
 - Enter the verification phase only after implementation tasks have been reported as complete or implementation evidence is available.
 - Update the implementation plan whenever new information invalidates earlier assumptions.
 - Make uncertainty visible. Track open questions, assumptions, and risks separately.
+
+## Human Review Gate Policy
+
+Human review gates are mandatory workflow boundaries.
+
+When a phase includes a required stop, stop after producing the artifact for that phase and ask the user for explicit confirmation before continuing.
+
+Do not generate artifacts from later phases in the same response unless the user explicitly asks to skip review gates or requests an end-to-end draft without pauses.
+
+Acceptable confirmations include:
+
+- approved
+- confirmed
+- looks good
+- continue
+- proceed
+- go ahead
+
+If confirmation is missing, do not continue to the next phase.
+
+Use direct review prompts such as:
+
+```text
+Please confirm whether this context pack is correct, especially the Objective, Desired State, Constraints, and Open Questions. Once confirmed, I will generate the implementation plan.
+```
+
+```text
+Please confirm whether this implementation plan can be used as the execution baseline. Once approved, I will generate the next required artifacts.
+```
+
+```text
+Please confirm the final verification result. After confirmation, I can generate optional delivery artifacts if needed.
+```
 
 ## Output Language Rule
 
@@ -95,7 +128,7 @@ Default structure:
 - [Risk and possible mitigation]
 ```
 
-Human review gate: for non-trivial work, ask the user to confirm or revise the context pack before finalizing the implementation plan.
+Required stop: after producing `context.md`, ask the user to confirm or revise it. Do not produce `implementation-plan.md` until the user explicitly confirms, unless the user has explicitly asked to skip review gates.
 
 ### 3. Implementation Plan Draft
 
@@ -164,7 +197,7 @@ Default structure:
 - v1: Initial draft
 ```
 
-Human review gate: ask the user to approve, reject, or revise the implementation plan before generating execution briefs.
+Required stop: after producing `implementation-plan.md`, ask the user to approve, reject, or revise it. Do not produce `task-breakdown.md`, `execution-briefs.md`, or `qa-checklist.md` until the user explicitly confirms, unless the user has explicitly asked to skip review gates.
 
 ### 4. Complexity Assessment and Routing
 
@@ -491,17 +524,26 @@ Default structure:
 [Yes / No, with rationale]
 ```
 
-Human review gate: for tasks with meaningful scope or risk, ask the user to confirm the final verification before producing polished delivery artifacts.
+Required stop: after producing `final-verification.md`, ask the user to confirm the verification result. Do not produce optional delivery artifacts until the user explicitly requests them.
 
-### 9. Final Delivery Artifacts
+After confirmation, ask whether the user wants optional delivery artifacts generated:
 
-Only after final verification should the following byproducts be generated.
+- `delivery-summary.md`
+- `status-update.md`
+- both
+- none; end the workflow
 
-`delivery-summary.md` is intended to be pasted into a merge request / pull request description. It should be review-oriented and include enough technical context for code reviewers.
+### 9. Optional Delivery Artifacts
 
-`status-update.md` is intended to be pasted as a Jira / ticket comment. It should be concise, status-oriented, and readable by non-implementation stakeholders.
+Final delivery artifacts are optional communication byproducts. Generate them only when the user requests delivery-ready materials, or when the user explicitly chooses them after final verification.
+
+These artifacts are not required for orchestration completion. The workflow may end after `final-verification.md` if no delivery communication is needed.
+
+Only generate these artifacts from verified facts in `final-verification.md` and available QA evidence. Do not introduce new assumptions.
 
 #### `delivery-summary.md`
+
+Intended to be pasted into a merge request / pull request description. It should be review-oriented and include enough technical context for code reviewers.
 
 ```markdown
 # Summary
@@ -531,6 +573,8 @@ Only after final verification should the following byproducts be generated.
 
 #### `status-update.md`
 
+Intended to be pasted as a Jira / ticket comment. It should be concise, status-oriented, and readable by non-implementation stakeholders.
+
 ```markdown
 Completed:
 
@@ -557,12 +601,12 @@ Status-update comments should stay concise and status-oriented for Jira / ticket
 
 ## Plan Update Rules
 
-When new information appears:
+When new information invalidates earlier assumptions or changes the execution path:
 
 1. Identify which artifact is affected.
-2. Update the plan version log.
-3. Explain what changed and why.
-4. Preserve earlier decisions only if they are still valid.
+2. Update the relevant artifact instead of silently continuing with stale assumptions.
+3. Add or update the plan version log when `implementation-plan.md` changes.
+4. Explain what changed and why.
 5. Regenerate dependent artifacts when necessary.
 
 Use this plan version pattern:
@@ -571,7 +615,7 @@ Use this plan version pattern:
 ## Plan Version Log
 
 - v1: Initial draft based on [context]
-- v2: Updated after user confirmation to [change]
+- v2: Updated after user confirmation: [change]
 - v3: Updated after implementation discovery: [change]
 ```
 
@@ -600,6 +644,7 @@ Before considering orchestration complete, verify that:
 - Complexity routing has clear justification.
 - Delegated workstreams are low-coupling when decomposition is used.
 - Execution briefs are tightly scoped and include validation instructions.
-- Verification occurs after implementation completion evidence is available.
+- Verification occurs only after implementation evidence is available.
 - The QA checklist maps back to acceptance criteria.
-- Final delivery artifacts are derived from verified facts, not assumptions.
+- `final-verification.md` clearly states whether the work is ready for delivery.
+- Optional delivery artifacts are generated only from verified facts, not assumptions.
