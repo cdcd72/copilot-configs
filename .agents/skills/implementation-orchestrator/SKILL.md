@@ -1,38 +1,39 @@
 ---
 name: implementation-orchestrator
-description: Orchestrate engineering implementation planning from user-provided context into reviewable plans, complexity assessment, task breakdowns, execution briefs for coding agents, QA verification, and final delivery artifacts. use when the user wants to turn a software task, tracked issue, review request, bug report, feature request, refactor, or technical change into an implementation plan; split implementation work into delegated coding-agent tasks; or validate completed implementation work before delivery.
+description: Turn engineering work into a reviewed execution baseline with a context pack, implementation plan, complexity routing, optional workstream breakdowns, execution briefs for coding agents or human executors, QA verification, and optional delivery updates. Use when the user wants to turn a bug, feature, refactor, review request, or technical task into an implementation plan, coordinate work across coding agents or human executors, or verify completed implementation against the approved plan.
 ---
 
 # Implementation Orchestrator
 
-## Overview
+Use this skill to convert engineering context into a controlled implementation workflow. The skill owns planning, routing, QA consolidation, and final verification. It may create execution briefs for coding agents or human executors, but it does not delegate its orchestration responsibilities.
 
-Use this skill to turn user-provided engineering context into a controlled, reviewable implementation plan. Prioritize understanding the available context, defining a feasible plan, decomposing the work into low-coupling implementation tasks, and preparing execution-ready briefs for coding agents or human executors.
+## At a Glance
 
-This skill owns the planning and coordination flow. It may produce execution briefs for delegated implementation work, but delegation applies to implementation workstreams, not to the skill's orchestration responsibilities. After the delegated implementation tasks are reported as complete, use this skill to consolidate the results, verify them against the approved plan and QA criteria, and then produce final delivery artifacts when needed.
+1. Gather context and produce `context.md`.
+2. Stop for confirmation unless the user explicitly asks to skip review gates.
+3. Produce `implementation-plan.md`, including complexity routing.
+4. Stop for plan approval unless the user explicitly asks to skip review gates.
+5. Always produce `execution-briefs.md` after plan approval, using `task-breakdown.md` when decomposition is required.
+6. Implement directly or delegate according to the approved routing and execution briefs.
+7. Verify completed work with `qa-checklist.md` and `final-verification.md`.
+8. Ask whether optional delivery artifacts are needed.
 
-## Core Principles
+## Operating Rules
 
-- Treat the implementation plan as the primary output of the planning phase.
-- Treat delivery summaries and status-update comments as final byproducts, not as the main workflow.
-- Do not generate execution briefs before producing a context pack and an implementation plan.
-- Keep human review gates explicit. Non-trivial tasks should pause for user confirmation after context collection, after the initial implementation plan, and after QA verification.
-- Prefer fewer, clearer artifacts over many loosely related notes.
-- Keep delegated implementation tasks low-coupling. Each task should have explicit inputs, expected outputs, ownership boundaries, and validation criteria.
-- Delegate implementation work only after the implementation plan has been explicitly approved, unless the user explicitly asks to skip review gates.
-- For low-complexity tasks, the assistant may execute implementation directly only when it has direct access to the required codebase, editing tools, and validation commands.
-- For medium or high complexity tasks, or when direct implementation access is unavailable, stop after producing execution briefs and wait for the user, human executor, or coding agent to provide implementation results.
-- Enter the verification phase only after implementation tasks have been reported as complete or implementation evidence is available.
-- Update the implementation plan whenever new information invalidates earlier assumptions.
-- Make uncertainty visible. Track open questions, assumptions, and risks separately.
+- Treat `implementation-plan.md` as the execution baseline.
+- Treat the complexity profile and recommended execution strategy as part of `implementation-plan.md`, not as a later-phase artifact.
+- Keep human review gates explicit unless the user clearly asks to skip them.
+- Prefer the lightest workflow that safely covers implementation risk, coordination risk, and verification risk.
+- Always create `execution-briefs.md` after plan approval.
+- Create `task-breakdown.md` only when routing calls for decomposition, and use it as the source for workstream-level execution briefs.
+- Do not enter active verification until implementation evidence is available.
+- Treat `delivery-summary.md` and `status-update.md` as optional byproducts, not mandatory workflow outputs.
+- Update the plan when new information invalidates earlier assumptions, and regenerate dependent artifacts when needed.
+- Keep uncertainty visible through assumptions, open questions, risks, and plan deviations.
 
-## Human Review Gate Policy
+## Review Gates
 
-Human review gates are mandatory workflow boundaries.
-
-When a phase includes a required stop, stop after producing the artifact for that phase and ask the user for explicit confirmation before continuing.
-
-Do not generate artifacts from later phases in the same response unless the user explicitly asks to skip review gates or requests an end-to-end draft without pauses.
+Human review gates are mandatory workflow boundaries unless the user explicitly asks to skip them or requests an end-to-end draft without pauses.
 
 Acceptable confirmations include:
 
@@ -43,44 +44,46 @@ Acceptable confirmations include:
 - proceed
 - go ahead
 
-If confirmation is missing, do not continue to the next phase.
+If confirmation is missing, stop at the current gate.
 
-Use direct review prompts such as:
+Use these prompts when pausing:
 
 ```text
 Please confirm whether this context pack is correct, especially the Objective, Desired State, Constraints, and Open Questions. Once confirmed, I will generate the implementation plan.
 ```
 
 ```text
-Please confirm whether this implementation plan can be used as the execution baseline. Once approved, I will generate the next required artifacts.
+Please confirm whether this implementation plan can be used as the execution baseline. Once approved, I will generate the execution artifacts required by the approved routing.
 ```
 
 ```text
-Please confirm the final verification result. After confirmation, I can generate optional delivery artifacts if needed.
+Please confirm the final verification result. Once confirmed, I will ask whether you want optional delivery artifacts.
 ```
 
-## Output Language Rule
+## Output Language
 
-Generate workflow artifacts in the user's requested language. If no output language is specified, use the language of the user's task description. Keep artifact filenames such as `context.md`, `implementation-plan.md`, `task-breakdown.md`, `execution-briefs.md`, `qa-checklist.md`, and `final-verification.md` in English unless the user explicitly requests localized filenames.
+Generate workflow artifacts in the user's requested language. If no output language is specified, use the language of the user's task description.
 
-Prefer keeping technical section headings in English for consistency across coding agents and review artifacts, while writing the section content in the selected output language. If the user asks for fully localized documents, localize both headings and content.
+Keep artifact filenames such as `context.md`, `implementation-plan.md`, `task-breakdown.md`, `execution-briefs.md`, `qa-checklist.md`, and `final-verification.md` in English unless the user explicitly requests localized filenames.
+
+Prefer keeping technical section headings in English for consistency across coding agents and review artifacts. If the user asks for fully localized documents, localize both headings and content.
 
 ## Workflow
 
 ### 1. Intake
 
-Collect the task objective and all available source material.
+Collect enough context to define the objective, desired outcome, and success criteria.
 
 Look for:
 
-- User request, issue, ticket, or task summary
-- Business or product intent
-- Current behavior and expected behavior
-- Relevant repositories, branches, files, logs, docs, tickets, existing review requests, or screenshots
-- Known constraints, deadlines, compatibility requirements, rollout expectations, and testing expectations
-- User preferences regarding models, tools, or execution style
+- user request, issue, ticket, or task summary
+- business or product intent
+- current behavior and expected behavior
+- relevant repositories, branches, files, logs, docs, tickets, review requests, or screenshots
+- known constraints, deadlines, compatibility requirements, rollout expectations, and testing expectations
+- user preferences about tools, models, or execution style
 
-If the core objective and expected outcome are clear enough to draft a plan, but some non-blocking details are missing, record those gaps as open questions with suggested defaults instead of blocking the workflow. If the objective, expected outcome, or success criteria are unclear, ask the user for clarification before planning.
+If the objective and desired outcome are mostly clear, capture non-blocking gaps as open questions with suggested defaults. If the objective, expected outcome, or success criteria remain unclear, ask for clarification before planning.
 
 ### 2. Context Pack
 
@@ -128,11 +131,13 @@ Default structure:
 - [Risk and possible mitigation]
 ```
 
-Required stop: after producing `context.md`, ask the user to confirm or revise it. Do not produce `implementation-plan.md` until the user explicitly confirms, unless the user has explicitly asked to skip review gates.
+Required stop: after producing `context.md`, ask the user to confirm or revise it. Do not produce `implementation-plan.md` until the user explicitly confirms, unless the user explicitly asks to skip review gates.
 
-### 3. Implementation Plan Draft
+### 3. Implementation Plan
 
 Once the context pack is sufficiently clear, produce `implementation-plan.md`.
+
+This artifact must include both the plan itself and the complexity routing that determines how execution should proceed.
 
 Default structure:
 
@@ -192,171 +197,83 @@ Default structure:
 
 - [Question and suggested default]
 
+## Complexity Profile
+
+Complexity Profile:
+implementation_complexity:
+level: Low | Medium | High
+rationale: [Reason]
+coordination_complexity:
+level: Low | Medium | High
+rationale: [Reason]
+verification_complexity:
+level: Low | Medium | High
+rationale: [Reason]
+requirement_volatility:
+level: Low | Medium | High
+rationale: [Reason]
+
+## Recommended Execution Strategy
+
+Recommended Execution Strategy:
+planning_mode: direct | iterative
+task_decomposition: none | light | aggressive
+execution_mode: direct | delegated
+execution_parallelism: none | limited | parallelizable
+verification_mode: focused | consolidated | rigorous
+human_review_frequency: normal | increased | high
+
 ## Plan Version Log
 
 - v1: Initial draft
 ```
 
-Required stop: after producing `implementation-plan.md`, ask the user to approve, reject, or revise it. Do not produce `task-breakdown.md`, `execution-briefs.md`, or `qa-checklist.md` until the user explicitly confirms, unless the user has explicitly asked to skip review gates.
+Required stop: after producing `implementation-plan.md`, ask the user to approve, reject, or revise it. Do not produce `task-breakdown.md`, `execution-briefs.md`, or `qa-checklist.md` until the user explicitly confirms, unless the user explicitly asks to skip review gates.
 
-### 4. Complexity Assessment and Routing
+### 4. Complexity Routing Guidance
 
-After the implementation plan draft is created, assess the task complexity before deciding how to execute it. This step is not only a Low / Medium / High label. It is an execution strategy assessment based on four dimensions:
+Assess four dimensions and include the result in `implementation-plan.md`.
 
-```text
-Overall Complexity Profile consists of:
-- Implementation Complexity
-- Coordination Complexity
-- Verification Complexity
-- Requirement Volatility
-```
+#### Implementation Complexity
 
-Evaluate each dimension separately, then use the resulting profile to decide task decomposition, execution parallelism, verification depth, and human review frequency.
+Use Low for narrow, low-risk changes with limited compatibility impact. Use Medium for cross-module logic, shared utilities, or moderate compatibility concerns. Use High for migrations, distributed behavior, concurrency, security-sensitive flows, or performance-critical paths.
 
-#### 4.1 Implementation Complexity
+#### Coordination Complexity
 
-Assess how difficult the actual implementation is.
+Use Low when a single executor can complete the work. Use Medium for 2-3 coordinated workstreams with manageable dependencies. Use High for cross-team, cross-service, or shared-contract changes with meaningful integration sequencing risk.
 
-Consider:
+#### Verification Complexity
 
-- Architecture complexity
-- Algorithm or data-flow complexity
-- Migration or compatibility requirements
-- Performance sensitivity
-- Security or privacy sensitivity
-- Unfamiliar technologies or fragile legacy code
+Use Low when unit tests or simple manual checks can verify the change. Use Medium when integration tests, E2E coverage, or coordinated manual QA are needed. Use High when the regression surface is broad, timing-sensitive, production-sensitive, or difficult to reproduce locally.
 
-Default levels:
+#### Requirement Volatility
 
-| Level  | Indicators                                                                                                        |
-| ------ | ----------------------------------------------------------------------------------------------------------------- |
-| Low    | Narrow scoped change, small refactor, simple UI or CRUD adjustment, no contract change                            |
-| Medium | Cross-module business logic, shared utilities, cache/config behavior, moderate compatibility concerns             |
-| High   | Distributed systems, concurrency, event ordering, migration, security-sensitive flows, performance-critical paths |
-
-#### 4.2 Coordination Complexity
-
-Assess how difficult it is to coordinate implementation across people, agents, modules, or workstreams.
-
-Consider:
-
-- Number of workstreams
-- Dependency graph complexity
-- Merge conflict risk
-- Ownership boundaries
-- Shared contracts or APIs
-- Integration sequencing
-
-Default levels:
-
-| Level  | Indicators                                                                               |
-| ------ | ---------------------------------------------------------------------------------------- |
-| Low    | A single executor can complete the work with minimal coordination                        |
-| Medium | 2-3 workstreams with clear dependencies and manageable integration risk                  |
-| High   | Cross-team, cross-service, schema/API coordination, or high parallel implementation risk |
-
-#### 4.3 Verification Complexity
-
-Assess how difficult it is to prove the implementation is correct after completion.
-
-Consider:
-
-- Regression surface
-- Integration or E2E test requirements
-- Manual QA burden
-- Async or timing-sensitive behavior
-- Observability or logging requirements
-- Rollback validation
-- Production-only failure modes
-
-Default levels:
-
-| Level  | Indicators                                                                                                                  |
-| ------ | --------------------------------------------------------------------------------------------------------------------------- |
-| Low    | Unit tests or simple manual checks can verify the change                                                                    |
-| Medium | Integration tests, E2E tests, or coordinated manual QA are needed                                                           |
-| High   | Distributed async behavior, race conditions, production-only risks, broad regression surface, or hard-to-reproduce behavior |
-
-#### 4.4 Requirement Volatility
-
-Assess how stable the requirement is.
-
-Consider:
-
-- Clarity of objective and expected outcome
-- Stability of acceptance criteria
-- Unresolved product, UX, or technical decisions
-- Exploratory nature of the work
-- Likelihood that implementation discoveries will change the plan
-
-Default levels:
-
-| Level  | Indicators                                                                                          |
-| ------ | --------------------------------------------------------------------------------------------------- |
-| Low    | Objective, desired state, and acceptance criteria are clear and stable                              |
-| Medium | Some details are unresolved but suggested defaults are reasonable                                   |
-| High   | The work is exploratory, acceptance criteria are unclear, or product/technical direction may change |
-
-#### 4.5 Complexity Profile Output
-
-Always include the complexity profile and recommended execution strategy in `implementation-plan.md`.
-
-If `task-breakdown.md` is generated, repeat the approved complexity profile at the beginning of the document as a short reference so the decomposition remains traceable to the routing decision.
-
-Use this structure:
-
-```yaml
-Complexity Profile:
-  implementation_complexity:
-    level: Low | Medium | High
-    rationale: [Reason]
-  coordination_complexity:
-    level: Low | Medium | High
-    rationale: [Reason]
-  verification_complexity:
-    level: Low | Medium | High
-    rationale: [Reason]
-  requirement_volatility:
-    level: Low | Medium | High
-    rationale: [Reason]
-```
-
-#### 4.6 Routing Rules
-
-Use the profile to decide the execution strategy.
-
-```yaml
-Recommended Execution Strategy:
-  planning_mode: direct | iterative
-  task_decomposition: none | light | aggressive
-  execution_parallelism: none | limited | parallelizable
-  verification_mode: focused | consolidated | rigorous
-  human_review_frequency: normal | increased | high
-```
+Use Low when the objective and acceptance criteria are stable. Use Medium when some details remain unresolved but reasonable defaults exist. Use High when the work is exploratory or likely to change based on implementation discovery.
 
 Apply these routing rules:
 
-- If all dimensions are Low, use direct planning, no task breakdown, one execution brief, and focused QA.
-- If Implementation Complexity is Medium or High, make the implementation plan more explicit before producing execution briefs.
-- If Coordination Complexity is Medium or High, create `task-breakdown.md` and define dependencies, boundaries, and integration sequence.
-- If Verification Complexity is Medium or High, define QA criteria early and require stronger implementation evidence before final verification.
-- If Requirement Volatility is Medium or High, use iterative planning, narrower workstreams, and more frequent human review gates.
-- If any dimension is High, explain why the workflow is being made heavier and what risk it reduces.
-
-Do not use complexity assessment as bureaucracy. Use it to choose the minimum orchestration required to execute safely.
+- If all dimensions are Low, prefer direct planning, no task breakdown, direct or single-threaded execution, and focused QA.
+- If `implementation_complexity` is Medium or High, make the implementation steps and acceptance criteria more explicit before execution.
+- If `coordination_complexity` is Medium or High, create `task-breakdown.md` and define dependencies, boundaries, and integration sequence before writing workstream-level execution briefs.
+- If `coordination_complexity` is Low, skip `task-breakdown.md` and derive a single execution brief directly from `implementation-plan.md`.
+- If `verification_complexity` is Medium or High, strengthen QA criteria early and require stronger implementation evidence before final verification.
+- If `requirement_volatility` is Medium or High, use iterative planning and more frequent review gates.
+- If any dimension is High, explain why the heavier workflow is necessary and what risk it reduces.
 
 ### 5. Task Breakdown
 
-For medium or high complexity work, produce `task-breakdown.md`.
+Produce `task-breakdown.md` when the approved routing calls for decomposition, especially when coordination complexity is Medium or High.
+
+This artifact is optional, but when it exists it becomes the source document for workstream-level execution briefs.
 
 Default structure:
 
 ```markdown
 # Task Breakdown
 
-## Complexity Classification
+## Complexity Profile Reference
 
-[Low / Medium / High and rationale]
+[Short restatement of the approved complexity profile]
 
 ## Workstreams
 
@@ -382,15 +299,19 @@ Default structure:
 - [Risk and mitigation]
 ```
 
-Split workstreams by responsibility boundary, dependency boundary, or validation boundary instead of arbitrary file count.
+Split workstreams by responsibility boundary, dependency boundary, or validation boundary rather than by file count alone.
 
 ### 6. Execution Briefs
 
-Produce `execution-briefs.md` for coding agents or human executors after the implementation plan has been reviewed or is sufficiently clear to execute.
+Always produce `execution-briefs.md` after the implementation plan is approved.
 
-Low complexity work should generate one brief. Medium or high complexity work should generate one brief per workstream. These briefs are intended for delegated implementation work; they do not delegate the orchestration flow itself.
+If `task-breakdown.md` is not needed, create a single execution brief derived directly from `implementation-plan.md`.
 
-For low-complexity tasks, if the current assistant has direct access to the codebase, editing tools, and validation commands required to safely complete the work, it may execute the task directly using the approved plan and then report implementation evidence. Otherwise, stop after producing execution briefs and wait for completion evidence from the user, human executor, or coding agent before entering QA verification.
+If `task-breakdown.md` exists, create one execution brief per workstream and keep each brief aligned with the approved dependencies, boundaries, and validation steps.
+
+If the approved routing supports `execution_mode: direct`, the brief may be addressed to the active agent and used to guide direct implementation.
+
+If the approved routing supports `execution_mode: delegated`, address the brief or briefs to the coding agents or human executors responsible for each scoped task.
 
 Each brief should contain:
 
@@ -435,15 +356,15 @@ You are responsible only for the scoped task below. Do not expand scope without 
 [What the executor must report back]
 ```
 
-Execution briefs should avoid unrelated context. Keep them executable and tightly scoped.
+Execution briefs should avoid unrelated context, remain tightly scoped, and map cleanly back to either the implementation plan or the task breakdown.
 
-### 7. QA Verification
+### 7. QA Checklist
 
-Define `qa-checklist.md` during planning based on the QA Criteria in the implementation plan, ensuring execution briefs have clear validation expectations. Do not enter the active verification phase until implementation tasks have been reported as complete or implementation evidence is available.
+This artifact defines the verification requirements and evidence expectations for implementation and final verification. It is not the verification result itself.
+
+Produce `qa-checklist.md` after plan approval, based on the approved QA criteria and routing. Use it to define what evidence is required before final verification.
 
 Acceptable implementation evidence includes code diffs, commits, review links, test results, logs, screenshots, implementation summaries, or coding agent handoff notes.
-
-Low complexity tasks may be verified by the same assistant after implementation. Medium or high complexity tasks should include a QA consolidation step that compares all completed workstreams against the approved plan, task breakdown, and QA criteria.
 
 Default structure:
 
@@ -490,9 +411,11 @@ Default structure:
 - [Follow-up item]
 ```
 
+Do not enter active verification until implementation evidence is available.
+
 ### 8. Final Verification
 
-After execution and QA evidence are available, produce `final-verification.md`.
+After implementation and QA evidence are available, produce `final-verification.md`.
 
 Default structure:
 
@@ -524,9 +447,9 @@ Default structure:
 [Yes / No, with rationale]
 ```
 
-Required stop: after producing `final-verification.md`, ask the user to confirm the verification result. Do not produce optional delivery artifacts until the user explicitly requests them.
+Required stop: after producing `final-verification.md`, ask the user to confirm the verification result. Do not generate delivery artifacts until the user explicitly chooses them.
 
-After confirmation, ask whether the user wants optional delivery artifacts generated:
+After confirmation, ask whether the user wants:
 
 - `delivery-summary.md`
 - `status-update.md`
@@ -535,15 +458,15 @@ After confirmation, ask whether the user wants optional delivery artifacts gener
 
 ### 9. Optional Delivery Artifacts
 
-Final delivery artifacts are optional communication byproducts. Generate them only when the user requests delivery-ready materials, or when the user explicitly chooses them after final verification.
+Final delivery artifacts are optional communication byproducts. Generate them only when the user explicitly requests them after final verification, or when the user asked for delivery-ready materials earlier and the verification result is confirmed.
 
 These artifacts are not required for orchestration completion. The workflow may end after `final-verification.md` if no delivery communication is needed.
 
-Only generate these artifacts from verified facts in `final-verification.md` and available QA evidence. Do not introduce new assumptions.
+Generate them only from verified facts in `final-verification.md` and available QA evidence. Do not introduce new assumptions.
 
 #### `delivery-summary.md`
 
-Intended to be pasted into a merge request / pull request description. It should be review-oriented and include enough technical context for code reviewers.
+Use this for merge request or pull request descriptions.
 
 ```markdown
 # Summary
@@ -573,7 +496,7 @@ Intended to be pasted into a merge request / pull request description. It should
 
 #### `status-update.md`
 
-Intended to be pasted as a Jira / ticket comment. It should be concise, status-oriented, and readable by non-implementation stakeholders.
+Use this for issue tracker or ticket comments.
 
 ```markdown
 Completed:
@@ -597,19 +520,19 @@ Follow-ups:
 - [Items requiring follow-up]
 ```
 
-Status-update comments should stay concise and status-oriented for Jira / ticket comments. Do not paste the full implementation plan into the target tracking system unless explicitly requested.
+Keep status updates concise and status-oriented. Do not paste the full implementation plan unless explicitly requested.
 
 ## Plan Update Rules
 
 When new information invalidates earlier assumptions or changes the execution path:
 
 1. Identify which artifact is affected.
-2. Update the relevant artifact instead of silently continuing with stale assumptions.
-3. Add or update the plan version log when `implementation-plan.md` changes.
+2. Update that artifact instead of silently continuing with stale assumptions.
+3. Add or update the version log when `implementation-plan.md` changes.
 4. Explain what changed and why.
 5. Regenerate dependent artifacts when necessary.
 
-Use this plan version pattern:
+Use this pattern:
 
 ```markdown
 ## Plan Version Log
@@ -619,32 +542,16 @@ Use this plan version pattern:
 - v3: Updated after implementation discovery: [change]
 ```
 
-## Human Review Gate Prompts
-
-Use direct review prompts such as:
-
-```text
-Please confirm whether this context pack is correct, especially the Objective, Desired State, Constraints, and Open Questions. Once confirmed, I will generate the implementation plan.
-```
-
-```text
-Please confirm whether this implementation plan can be used as the execution baseline. Once approved, I will perform complexity routing and generate execution briefs and a QA checklist.
-```
-
-```text
-Please confirm the final verification results. Once confirmed, I will generate the delivery summary and status-update comment.
-```
-
 ## Quality Bar
 
 Before considering orchestration complete, verify that:
 
-- The context pack explains why the task exists and what success means.
-- The implementation plan is specific enough to execute.
-- Complexity routing has clear justification.
-- Delegated workstreams are low-coupling when decomposition is used.
-- Execution briefs are tightly scoped and include validation instructions.
-- Verification occurs only after implementation evidence is available.
-- The QA checklist maps back to acceptance criteria.
-- `final-verification.md` clearly states whether the work is ready for delivery.
-- Optional delivery artifacts are generated only from verified facts, not assumptions.
+- the context pack explains why the task exists and what success means
+- the implementation plan is specific enough to execute
+- the complexity profile and routing are justified and consistent with the approved plan
+- delegated workstreams are low-coupling when decomposition is used
+- execution briefs are always produced, are tightly scoped, and include validation instructions
+- verification occurs only after implementation evidence is available
+- the QA checklist maps back to acceptance criteria
+- `final-verification.md` clearly states whether the work is ready for delivery
+- optional delivery artifacts are generated only from verified facts, not assumptions
