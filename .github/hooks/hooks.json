@@ -1,10 +1,39 @@
 {
   "version": 1,
   "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "matcher": "create|edit|str_replace_editor|apply_patch",
+        "bash": "node .github/hooks/scripts/git-auto-commit.mjs before-edit",
+        "powershell": "node .github/hooks/scripts/git-auto-commit.mjs before-edit",
+        "cwd": ".",
+        "timeoutSec": 15
+      },
+      {
+        "type": "command",
+        "matcher": "bash|powershell",
+        "bash": "node .github/hooks/scripts/block-dangerous.mjs",
+        "powershell": "node .github/hooks/scripts/block-dangerous.mjs",
+        "cwd": ".",
+        "timeoutSec": 5
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "matcher": "create|edit|str_replace_editor|apply_patch",
+        "bash": "node .github/hooks/scripts/format-lint.mjs",
+        "powershell": "node .github/hooks/scripts/format-lint.mjs",
+        "cwd": ".",
+        "timeoutSec": 30
+      }
+    ],
     "userPromptSubmitted": [
       {
         "type": "command",
-        "powershell": "scripts/log-prompt.ps1",
+        "bash": "node .github/hooks/scripts/log-prompt.mjs",
+        "powershell": "node .github/hooks/scripts/log-prompt.mjs",
         "cwd": ".",
         "env": {
           "LOG_LEVEL": "INFO",
@@ -12,6 +41,15 @@
           "LOG_INCLUDE_PROMPT_CONTENT": "false",
           "LOG_INCLUDE_RAW_PAYLOAD": "false"
         }
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/git-auto-commit.mjs session-stop",
+        "powershell": "node .github/hooks/scripts/git-auto-commit.mjs session-stop",
+        "cwd": ".",
+        "timeoutSec": 15
       }
     ]
   }

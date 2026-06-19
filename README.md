@@ -8,12 +8,23 @@
 .
 ├─ .agents/
 │  └─ skills/
+│     ├─ commit/SKILL.md
+│     ├─ commit-push/SKILL.md
+│     ├─ commit-push-pr/SKILL.md
 │     ├─ doc-coauthoring/SKILL.md
-│     └─ find-skills/SKILL.md
+│     ├─ find-skills/SKILL.md
+│     ├─ review/SKILL.md
+│     └─ test/SKILL.md
 ├─ .github/
 │  ├─ agents/
 │  │  └─ code-review.agent.md
+│  ├─ copilot-instructions.md
 │  ├─ hooks/
+│  │  ├─ scripts/
+│  │  │  ├─ block-dangerous.mjs
+│  │  │  ├─ format-lint.mjs
+│  │  │  ├─ git-auto-commit.mjs
+│  │  │  └─ log-prompt.mjs
 │  │  └─ hooks.json
 │  ├─ instructions/
 │  │  └─ (None yet)
@@ -21,8 +32,6 @@
 │  │  └─ gitignore.prompt.md
 │  └─ workflows/
 │     └─ copilot-setup-steps.yml
-├─ scripts/
-│  └─ log-prompt.ps1
 ├─ skills-lock.json
 ├─ README.md
 └─ LICENSE
@@ -33,11 +42,18 @@
 - `.github/agents/`：自訂 agent 定義。
   - `code-review.agent.md`：通用程式碼審查代理，聚焦安全性、效能、架構與測試品質。
 
+- `.github/copilot-instructions.md`：儲存庫層級的 Copilot 指示，現階段主要規範 Windows + PowerShell 的工具使用慣例。
+
 - `.github/instructions/`：跨任務共用實作規範。
   - `(None yet)`：目前尚無共用實作規範。
 
 - `.github/hooks/`：GitHub Copilot Hooks 設定。
-  - `hooks.json`：目前註冊 `userPromptSubmitted` 事件，執行 `scripts/log-prompt.ps1` 進行提示記錄。
+  - `scripts/`：掛鉤腳本。
+    - `block-dangerous.mjs`：在 shell 工具執行前檢查高風險命令，必要時回傳 deny 給 Copilot。
+    - `format-lint.mjs`：在檔案建立/修改成功後，嘗試對受影響檔案執行 Prettier 與 ESLint 修正。
+    - `git-auto-commit.mjs`：在編輯前建立 checkpoint commit，並在 agent stop 後自動提交本次工作結果。
+    - `log-prompt.mjs`：跨平台接收 hook payload，寫入 `logs/prompt_logs.jsonl`。
+  - `hooks.json`：目前註冊 `preToolUse`、`postToolUse`、`agentStop` 與 `userPromptSubmitted`，分別提供危險指令攔截、寫檔前 checkpoint、寫檔後格式化/修正、結束時自動提交，以及提示記錄。
 
 - `.github/prompts/`：可重用 prompt 範本。
   - `gitignore.prompt.md`：協助建立/調整 `.gitignore` 規則。
@@ -45,12 +61,14 @@
 - `.github/workflows/`：GitHub Actions 工作流程。
   - `copilot-setup-steps.yml`：定義 Copilot agent 啟動前的環境準備步驟（含字型安裝）。
 
-- `scripts/`：本機腳本。
-  - `log-prompt.ps1`：接收 hook payload，寫入 `logs/prompt_logs.jsonl`，支援等級門檻與敏感欄位開關。
-
 - `.agents/skills/`：Agent Skills 定義（由 Copilot 在對應情境自動載入）。
+  - `commit/SKILL.md`：依目前工作區變更建立一次符合 Conventional Commits 的提交。
+  - `commit-push/SKILL.md`：依目前工作區變更建立提交並推送到遠端。
+  - `commit-push-pr/SKILL.md`：依目前工作區變更建立提交、推送並建立 Pull Request。
   - `doc-coauthoring/SKILL.md`：協助撰寫與共同編輯文件、提案、技術規格與決策文件。
   - `find-skills/SKILL.md`：協助搜尋、挑選與安裝可用 skills（`npx skills find/add/check/update`）。
+  - `review/SKILL.md`：對目前工作目錄中的變更做嚴格技術審查，優先指出 bug、風險、回歸與測試缺口。
+  - `test/SKILL.md`：執行現有測試、分析失敗原因，並在必要時補充關鍵測試以驗證程式碼正確性。
 
 - 根目錄檔案：
   - `skills-lock.json`：鎖定 skills 來源與 hash，確保技能版本一致。
@@ -59,7 +77,7 @@
 
 ## Hook 提示記錄設定
 
-目前 `userPromptSubmitted` 事件使用 `scripts/log-prompt.ps1`，可透過 `.github/hooks/hooks.json` 的 `env` 控制：
+目前 `userPromptSubmitted` 事件使用 `.github/hooks/scripts/log-prompt.mjs`，可透過 `.github/hooks/hooks.json` 的 `env` 控制：
 
 - `LOG_LEVEL`：記錄門檻，支援 `OFF`、`ERROR`、`WARN`、`INFO`、`DEBUG`。
 - `LOG_DIR`：日誌輸出目錄（預設為 `logs`）。
@@ -85,13 +103,14 @@
 
 1. 將專用代理放在 `.github/agents/`。
 2. 將鉤子設定放在 `.github/hooks/hooks.json`。
-3. 將可重用規範放在 `.github/instructions/`。
-4. 將可重用提示放在 `.github/prompts/`。
-5. 以 `skills-lock.json` 管理 skills 來源；新增 skill 後同步更新 lock 檔。
+3. 將儲存庫層級規範放在 `.github/copilot-instructions.md`。
+4. 將可重用規範放在 `.github/instructions/`。
+5. 將可重用提示放在 `.github/prompts/`。
+6. 以 `skills-lock.json` 管理 skills 來源；新增 skill 後同步更新 lock 檔。
 
 ## 維護建議
 
-- 新增/調整 agent、hook、instruction、prompt、skill 後，同步更新本 README 的「目前結構」與說明。
+- 新增/調整 agent、hook、instruction、prompt、skill 或 repo-level copilot 指示後，同步更新本 README 的「目前結構」與說明。
 - 保持 `.github/instructions/*.md` 的 `applyTo` 範圍精準，避免規則誤套用。
 
 ## 貢獻
