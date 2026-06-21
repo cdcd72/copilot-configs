@@ -1,3 +1,5 @@
+> ⚠️ 此分支不再維護，目前只打算維護 main 分支，以降低維護成本，以下內容僅供參考。
+
 # Copilot 設定
 
 本儲存庫用於集中管理 GitHub Copilot 的自訂設定，包含 agents、instructions、prompts 與 skills。
