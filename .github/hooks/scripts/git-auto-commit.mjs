@@ -8,7 +8,7 @@ const MODE_CONFIG = {
         message: 'backup: before Copilot edit'
     },
     'session-stop': {
-        message: 'feat: Copilot Code auto-commit',
+        message: 'feat: Copilot auto-commit',
         allowEmpty: true
     }
 };
