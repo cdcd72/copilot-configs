@@ -20,14 +20,12 @@ async function readStdinJson() {
 
 function isDangerousCommand(command) {
   const rules = [
-    /\brm\s+(-[^\s]*r[^\s]*f|-.[^\s]*f[^\s]*r)\b/i,
-    /\brm\s+-r\s+\/\b/i,
-    /\brm\s+(-[^\s]*r[^\s]*f|-.[^\s]*f[^\s]*r)\s+\/\b/i,
-    /\bsudo\s+rm\s+(-[^\s]*r[^\s]*f|-.[^\s]*f[^\s]*r)\b/i,
-    /\bdd\s+.*\bof=\/dev\//i,
-    /\bmkfs(\.\w+)?\b/i,
-    /\bshutdown\b/i,
-    /\breboot\b/i,
+    /\brm\s+(-[^\s]*r[^\s]*f|-.[^\s]*f[^\s]*r)\b/, // rm -rf / rm -fr
+    /\brm\s+-r\s+\/\b/, // rm -r /
+    /\bdd\s+.*\bof=\/dev\//,
+    /\bmkfs(\.\w+)?\b/,
+    /\bshutdown\b/,
+    /\breboot\b/,
     /\bRemove-Item\b[^\r\n]*\s-(?:Recurse|r)\b[^\r\n]*\s-(?:Force|f)\b/i,
     /\bRemove-Item\b[^\r\n]*\s-(?:Force|f)\b[^\r\n]*\s-(?:Recurse|r)\b/i,
     /\bClear-Disk\b/i,
