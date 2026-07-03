@@ -18,6 +18,26 @@ async function readStdinJson() {
   return JSON.parse(raw);
 }
 
+function parseMaybeJson(value) {
+  if (!value) {
+    return null;
+  }
+
+  if (typeof value === 'string') {
+    if (!value.trim()) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
+  }
+
+  return value;
+}
+
 function isDangerousCommand(command) {
   const rules = [
     /\brm\s+(-[^\s]*r[^\s]*f|-.[^\s]*f[^\s]*r)\b/, // rm -rf / rm -fr
@@ -38,18 +58,22 @@ function isDangerousCommand(command) {
 }
 
 function getCommand(payload) {
-  if (
-    payload?.tool_input?.command &&
-    typeof payload.tool_input.command === 'string'
-  ) {
-    return payload.tool_input.command;
+  const toolArgs = parseMaybeJson(payload?.toolArgs);
+  if (toolArgs?.command && typeof toolArgs.command === 'string') {
+    return toolArgs.command;
   }
 
+  const toolInput = parseMaybeJson(payload?.tool_input);
+  if (toolInput?.command && typeof toolInput.command === 'string') {
+    return toolInput.command;
+  }
+
+  const legacyToolInput = parseMaybeJson(payload?.toolInput);
   if (
-    payload?.toolArgs?.command &&
-    typeof payload.toolArgs.command === 'string'
+    legacyToolInput?.command &&
+    typeof legacyToolInput.command === 'string'
   ) {
-    return payload.toolArgs.command;
+    return legacyToolInput.command;
   }
 
   return '';
@@ -75,5 +99,5 @@ async function main() {
 
 main().catch((error) => {
   console.error(`[block-dangerous Hook Error] ${error.message}`);
-  process.exit(0);
+  process.exit(1);
 });

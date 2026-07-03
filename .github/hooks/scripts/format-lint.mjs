@@ -55,6 +55,26 @@ async function readStdinJson() {
   return JSON.parse(raw);
 }
 
+function parseMaybeJson(value) {
+  if (!value) {
+    return null;
+  }
+
+  if (typeof value === 'string') {
+    if (!value.trim()) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
+  }
+
+  return value;
+}
+
 function normalizePath(value) {
   if (typeof value !== 'string' || value.trim() === '') {
     return null;
@@ -82,7 +102,15 @@ function collectPathsFromPatch(patchText) {
 }
 
 function extractCandidatePaths(toolInput) {
-  if (!toolInput || typeof toolInput !== 'object') {
+  if (!toolInput) {
+    return [];
+  }
+
+  if (typeof toolInput === 'string') {
+    return collectPathsFromPatch(toolInput);
+  }
+
+  if (typeof toolInput !== 'object') {
     return [];
   }
 
@@ -136,9 +164,17 @@ function runCommand(command, args, options) {
   return result.status === 0;
 }
 
+function getToolInput(input) {
+  return (
+    parseMaybeJson(input?.toolArgs) ??
+    parseMaybeJson(input?.tool_input) ??
+    parseMaybeJson(input?.toolInput)
+  );
+}
+
 async function main() {
   const input = await readStdinJson();
-  const toolInput = input.tool_input ?? input.toolArgs;
+  const toolInput = getToolInput(input);
   const projectRoot = process.cwd();
   const filePaths = dedupeExistingFiles(
     projectRoot,
@@ -182,5 +218,5 @@ async function main() {
 
 main().catch((error) => {
   console.error(`[format-lint Hook Error] ${error.message}`);
-  process.exit(0);
+  process.exit(1);
 });
