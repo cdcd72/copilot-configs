@@ -172,6 +172,17 @@ function getToolInput(input) {
   );
 }
 
+function formatLintErrors(fileReport) {
+  return fileReport.messages
+    .filter((message) => message.severity === 2)
+    .slice(0, 10)
+    .map(
+      (message) =>
+        `  L${message.line}:${message.column} [${message.ruleId ?? 'unknown-rule'}] ${message.message}`,
+    )
+    .join('\n');
+}
+
 async function main() {
   const input = await readStdinJson();
   const toolInput = getToolInput(input);
@@ -194,8 +205,11 @@ async function main() {
     return;
   }
 
-  const options = {
-    stdio: 'inherit',
+  const prettierOptions = {
+    stdio: 'ignore',
+  };
+  const eslintOptions = {
+    encoding: 'utf-8',
   };
 
   for (const absolutePath of filePaths) {
@@ -207,11 +221,43 @@ async function main() {
     const isLintTarget = /\.(js|jsx|ts|tsx|svelte)$/i.test(relativePath);
 
     if (isFormatTarget) {
-      spawnCommand('pnpm', ['prettier', '--write', relativePath], options);
+      spawnCommand('pnpm', ['prettier', '--write', relativePath], prettierOptions);
     }
 
     if (isLintTarget) {
-      spawnCommand('pnpm', ['eslint', '--fix', relativePath], options);
+      const eslintResult = spawnCommand(
+        'pnpm',
+        ['eslint', '--fix', '--format', 'json', relativePath],
+        eslintOptions,
+      );
+
+      let lintReports = [];
+      try {
+        lintReports = JSON.parse(eslintResult.stdout || '[]');
+      } catch {
+        if (eslintResult.stderr) {
+          console.error(
+            `[format-lint] eslint 執行異常：${eslintResult.stderr.slice(0, 500)}`,
+          );
+        }
+
+        continue;
+      }
+
+      const normalizedAbsolutePath = path.normalize(absolutePath);
+      const fileReport =
+        lintReports.find(
+          (report) => path.normalize(report.filePath) === normalizedAbsolutePath,
+        ) ?? lintReports[0];
+
+      if (fileReport && fileReport.errorCount > 0) {
+        const summary = formatLintErrors(fileReport);
+
+        console.error(
+          `[format-lint] ${path.basename(relativePath)} 仍有 ${fileReport.errorCount} 個 ESLint 無法自動修復的錯誤：\n${summary}\n請修正這些問題。`,
+        );
+        process.exit(2);
+      }
     }
   }
 }
