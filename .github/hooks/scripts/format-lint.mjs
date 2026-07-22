@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-import { spawnSync } from 'node:child_process';
-import fs from 'node:fs';
-import path from 'node:path';
-import process from 'node:process';
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import process from "node:process";
 
 function quoteWindowsArg(value) {
-  if (typeof value !== 'string') {
-    return '';
+  if (typeof value !== "string") {
+    return "";
   }
 
   if (!/[\s"]/u.test(value)) {
@@ -18,18 +18,14 @@ function quoteWindowsArg(value) {
 }
 
 function spawnCommand(command, args, options = {}) {
-  if (process.platform === 'win32') {
-    const commandLine = [command, ...args].map(quoteWindowsArg).join(' ');
+  if (process.platform === "win32") {
+    const commandLine = [command, ...args].map(quoteWindowsArg).join(" ");
 
-    return spawnSync(
-      process.env.ComSpec ?? 'cmd.exe',
-      ['/d', '/s', '/c', commandLine],
-      {
-        shell: false,
-        windowsHide: true,
-        ...options,
-      },
-    );
+    return spawnSync(commandLine, [], {
+      shell: true,
+      windowsHide: true,
+      ...options,
+    });
   }
 
   return spawnSync(command, args, {
@@ -60,7 +56,7 @@ function parseMaybeJson(value) {
     return null;
   }
 
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     if (!value.trim()) {
       return null;
     }
@@ -76,29 +72,44 @@ function parseMaybeJson(value) {
 }
 
 function normalizePath(value) {
-  if (typeof value !== 'string' || value.trim() === '') {
+  if (typeof value !== "string" || value.trim() === "") {
     return null;
   }
 
-  return value.replace(/^['"]|['"]$/g, '');
+  return value.replace(/^['"]|['"]$/g, "");
 }
 
 function collectPathsFromPatch(patchText) {
-  if (typeof patchText !== 'string' || patchText.trim() === '') {
+  if (typeof patchText !== "string" || patchText.trim() === "") {
     return [];
   }
 
-  const matches = patchText.matchAll(/^\*\*\* (?:Add|Update) File: (.+)$/gm);
-  const filePaths = [];
+  const filePaths = new Set();
 
-  for (const match of matches) {
+  const customPatchMatches = patchText.matchAll(
+    /^\*\*\* (?:Add|Update) File: (.+)$/gm,
+  );
+
+  for (const match of customPatchMatches) {
     const filePath = normalizePath(match[1]);
     if (filePath) {
-      filePaths.push(filePath);
+      filePaths.add(filePath);
     }
   }
 
-  return filePaths;
+  const unifiedDiffMatches = patchText.matchAll(
+    /^(?:\+\+\+|---)\s+(?:a\/|b\/)?(.+)$/gm,
+  );
+
+  for (const match of unifiedDiffMatches) {
+    const filePath = normalizePath(match[1]);
+
+    if (filePath && filePath !== "/dev/null") {
+      filePaths.add(filePath);
+    }
+  }
+
+  return [...filePaths];
 }
 
 function extractCandidatePaths(toolInput) {
@@ -106,11 +117,11 @@ function extractCandidatePaths(toolInput) {
     return [];
   }
 
-  if (typeof toolInput === 'string') {
+  if (typeof toolInput === "string") {
     return collectPathsFromPatch(toolInput);
   }
 
-  if (typeof toolInput !== 'object') {
+  if (typeof toolInput !== "object") {
     return [];
   }
 
@@ -123,8 +134,17 @@ function extractCandidatePaths(toolInput) {
     .map(normalizePath)
     .filter(Boolean);
 
-  if (typeof toolInput.input === 'string') {
-    candidates.push(...collectPathsFromPatch(toolInput.input));
+  const patchSources = [
+    toolInput.input,
+    toolInput.patch,
+    toolInput.patchText,
+    toolInput.patch_text,
+  ];
+
+  for (const patchSource of patchSources) {
+    if (typeof patchSource === "string") {
+      candidates.push(...collectPathsFromPatch(patchSource));
+    }
   }
 
   return candidates;
@@ -165,10 +185,12 @@ function runCommand(command, args, options) {
 }
 
 function getToolInput(input) {
+  if (!input) return null;
   return (
-    parseMaybeJson(input?.toolArgs) ??
-    parseMaybeJson(input?.tool_input) ??
-    parseMaybeJson(input?.toolInput)
+    parseMaybeJson(input.toolArgs) ??
+    parseMaybeJson(input.tool_input) ??
+    parseMaybeJson(input.toolInput) ??
+    input
   );
 }
 
@@ -178,9 +200,9 @@ function formatLintErrors(fileReport) {
     .slice(0, 10)
     .map(
       (message) =>
-        `  L${message.line}:${message.column} [${message.ruleId ?? 'unknown-rule'}] ${message.message}`,
+        `  L${message.line}:${message.column} [${message.ruleId ?? "unknown-rule"}] ${message.message}`,
     )
-    .join('\n');
+    .join("\n");
 }
 
 async function main() {
@@ -196,20 +218,21 @@ async function main() {
     return;
   }
 
-  const hasPackageJson = fs.existsSync(path.join(projectRoot, 'package.json'));
-  const pnpmExists = runCommand('pnpm', ['--version'], {
-    stdio: 'ignore',
+  const hasPackageJson = fs.existsSync(path.join(projectRoot, "package.json"));
+  const pnpmExists = runCommand("pnpm", ["--version"], {
+    stdio: "ignore",
   });
 
   if (!hasPackageJson || !pnpmExists) {
+    console.error("[format-lint] package.json or pnpm not found");
     return;
   }
 
   const prettierOptions = {
-    stdio: 'ignore',
+    stdio: "ignore",
   };
   const eslintOptions = {
-    encoding: 'utf-8',
+    stdio: "pipe",
   };
 
   for (const absolutePath of filePaths) {
@@ -221,20 +244,31 @@ async function main() {
     const isLintTarget = /\.(js|jsx|ts|tsx|svelte)$/i.test(relativePath);
 
     if (isFormatTarget) {
-      spawnCommand('pnpm', ['prettier', '--write', relativePath], prettierOptions);
+      spawnCommand(
+        "pnpm",
+        ["prettier", "--write", relativePath],
+        prettierOptions,
+      );
     }
 
     if (isLintTarget) {
       const eslintResult = spawnCommand(
-        'pnpm',
-        ['eslint', '--fix', '--format', 'json', relativePath],
+        "pnpm",
+        ["eslint", "--fix", "--format", "json", relativePath],
         eslintOptions,
       );
 
       let lintReports = [];
       try {
-        lintReports = JSON.parse(eslintResult.stdout || '[]');
-      } catch {
+        const stdout = eslintResult.stdout;
+        const jsonString =
+          typeof stdout === "string"
+            ? stdout
+            : stdout
+              ? stdout.toString()
+              : "[]";
+        lintReports = JSON.parse(jsonString);
+      } catch (err) {
         if (eslintResult.stderr) {
           console.error(
             `[format-lint] eslint 執行異常：${eslintResult.stderr.slice(0, 500)}`,
@@ -247,16 +281,19 @@ async function main() {
       const normalizedAbsolutePath = path.normalize(absolutePath);
       const fileReport =
         lintReports.find(
-          (report) => path.normalize(report.filePath) === normalizedAbsolutePath,
+          (report) =>
+            path.normalize(report.filePath) === normalizedAbsolutePath,
         ) ?? lintReports[0];
 
       if (fileReport && fileReport.errorCount > 0) {
         const summary = formatLintErrors(fileReport);
 
-        console.error(
-          `[format-lint] ${path.basename(relativePath)} 仍有 ${fileReport.errorCount} 個 ESLint 無法自動修復的錯誤：\n${summary}\n請修正這些問題。`,
+        process.stdout.write(
+          JSON.stringify({
+            additionalContext: `格式化後仍有 ESLint 無法自動修復的錯誤：\n${summary}\n請修正這些錯誤。`,
+          }),
         );
-        process.exit(2);
+        process.exit(0);
       }
     }
   }

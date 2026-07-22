@@ -6,7 +6,7 @@
         "type": "command",
         "matcher": "bash|powershell",
         "bash": "node .github/hooks/scripts/block-dangerous.mjs",
-        "powershell": "node .github/hooks/scripts/block-dangerous.mjs",
+        "powershell": "node .github\\hooks\\scripts\\block-dangerous.mjs",
         "cwd": ".",
         "timeoutSec": 5
       }
@@ -16,7 +16,7 @@
         "type": "command",
         "matcher": "create|edit|str_replace_editor|apply_patch",
         "bash": "node .github/hooks/scripts/format-lint.mjs",
-        "powershell": "node .github/hooks/scripts/format-lint.mjs",
+        "powershell": "node .github\\hooks\\scripts\\format-lint.mjs",
         "cwd": ".",
         "timeoutSec": 30
       }
@@ -25,7 +25,7 @@
       {
         "type": "command",
         "bash": "node .github/hooks/scripts/log-prompt.mjs",
-        "powershell": "node .github/hooks/scripts/log-prompt.mjs",
+        "powershell": "node .github\\hooks\\scripts\\log-prompt.mjs",
         "cwd": ".",
         "env": {
           "LOG_LEVEL": "INFO",
