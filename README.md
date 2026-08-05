@@ -14,16 +14,17 @@
 │     ├─ doc-coauthoring/SKILL.md
 │     ├─ find-skills/SKILL.md
 │     ├─ review/SKILL.md
+│     ├─ simple-sdd/SKILL.md
 │     └─ test/SKILL.md
 ├─ .github/
 │  ├─ agents/
-│  │  └─ code-review.agent.md
+│  │  ├─ code-review.agent.md
+│  │  └─ test-quality-reviewer.agent.md
 │  ├─ copilot-instructions.md
 │  ├─ hooks/
 │  │  ├─ scripts/
 │  │  │  ├─ block-dangerous.mjs
 │  │  │  ├─ format-lint.mjs
-│  │  │  ├─ git-auto-commit.mjs
 │  │  │  └─ log-prompt.mjs
 │  │  └─ hooks.json
 │  ├─ instructions/
@@ -41,6 +42,7 @@
 
 - `.github/agents/`：自訂 agent 定義。
   - `code-review.agent.md`：通用程式碼審查代理，聚焦安全性、效能、架構與測試品質。
+  - `test-quality-reviewer.agent.md`：在測試檔案新增或修改後主動審查測試品質，判斷是否真的能抓到 bug，而非只是灌覆蓋率。
 
 - `.github/copilot-instructions.md`：儲存庫層級的 Copilot 指示，現階段主要規範 Windows + PowerShell 的工具使用慣例。
 
@@ -50,10 +52,9 @@
 - `.github/hooks/`：GitHub Copilot Hooks 設定。
   - `scripts/`：掛鉤腳本。
     - `block-dangerous.mjs`：在 shell 工具執行前檢查高風險命令，必要時回傳 deny 給 Copilot。
-    - `format-lint.mjs`：在檔案建立/修改成功後，嘗試對受影響檔案執行 Prettier 與 ESLint 修正。
-    - `git-auto-commit.mjs`：在編輯前建立 checkpoint commit，並在 agent stop 後自動提交本次工作結果。
+    - `format-lint.mjs`：在檔案建立/修改成功後，嘗試對受影響檔案執行 Prettier 與 ESLint 修正，並顯示無法自動修復的 ESLint 錯誤。
     - `log-prompt.mjs`：跨平台接收 hook payload，寫入 `logs/prompt_logs.jsonl`。
-  - `hooks.json`：目前註冊 `preToolUse`、`postToolUse`、`agentStop` 與 `userPromptSubmitted`，分別提供危險指令攔截、寫檔前 checkpoint、寫檔後格式化/修正、結束時自動提交，以及提示記錄。
+  - `hooks.json`：目前註冊 `preToolUse`、`postToolUse` 與 `userPromptSubmitted`，分別提供危險指令攔截、寫檔後格式化/修正，以及提示記錄。
 
 - `.github/prompts/`：可重用 prompt 範本。
   - `gitignore.prompt.md`：協助建立/調整 `.gitignore` 規則。
@@ -68,6 +69,7 @@
   - `doc-coauthoring/SKILL.md`：協助撰寫與共同編輯文件、提案、技術規格與決策文件。
   - `find-skills/SKILL.md`：協助搜尋、挑選與安裝可用 skills（`npx skills find/add/check/update`）。
   - `review/SKILL.md`：對目前工作目錄中的變更做嚴格技術審查，優先指出 bug、風險、回歸與測試缺口。
+  - `simple-sdd/SKILL.md`：輕量級 SDD 開發流程，分「提案 → 實作 → 歸檔」三階段，動手寫程式前先確認需求並取得使用者同意。
   - `test/SKILL.md`：執行現有測試、分析失敗原因，並在必要時補充關鍵測試以驗證程式碼正確性。
 
 - 根目錄檔案：
