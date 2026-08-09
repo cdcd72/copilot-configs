@@ -1,0 +1,736 @@
+<!doctype html>
+<title>簡報流程檔：給生成 AI 的結構化藍圖</title>
+<meta name="description" content="拆解「簡報流程檔」這個方法論：它不是逐字稿，而是寫給簡報生成 AI 代理的結構化輸入，能讓長任務不中斷、不重工。">
+<style>
+  :root {
+    --bg: #F2F3F1;
+    --surface: #FFFFFF;
+    --surface-well: #E7E9E5;
+    --border: rgba(23, 27, 33, 0.15);
+    --border-strong: rgba(23, 27, 33, 0.26);
+    --ink: #171B21;
+    --ink-soft: #4C5560;
+    --ink-faint: #838D99;
+    --accent: #C1552A;
+    --accent-ink: #7A3115;
+    --accent2: #1F7A63;
+    --accent2-ink: #144F40;
+
+    --tb-bg: #123152;
+    --tb-bg-2: #0D2440;
+    --tb-ink: #F3F7FC;
+    --tb-ink-soft: #A9C3DE;
+    --tb-accent: #F3A85E;
+    --tb-line: rgba(255, 255, 255, 0.16);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101317;
+      --surface: #191D23;
+      --surface-well: #21262E;
+      --border: rgba(255, 255, 255, 0.14);
+      --border-strong: rgba(255, 255, 255, 0.24);
+      --ink: #ECEEF1;
+      --ink-soft: #A9B0BA;
+      --ink-faint: #6D7681;
+      --accent: #E88950;
+      --accent-ink: #FBD8BE;
+      --accent2: #57C4A6;
+      --accent2-ink: #CFF1E7;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #101317;
+    --surface: #191D23;
+    --surface-well: #21262E;
+    --border: rgba(255, 255, 255, 0.14);
+    --border-strong: rgba(255, 255, 255, 0.24);
+    --ink: #ECEEF1;
+    --ink-soft: #A9B0BA;
+    --ink-faint: #6D7681;
+    --accent: #E88950;
+    --accent-ink: #FBD8BE;
+    --accent2: #57C4A6;
+    --accent2-ink: #CFF1E7;
+  }
+
+  :root[data-theme="light"] {
+    --bg: #F2F3F1;
+    --surface: #FFFFFF;
+    --surface-well: #E7E9E5;
+    --border: rgba(23, 27, 33, 0.15);
+    --border-strong: rgba(23, 27, 33, 0.26);
+    --ink: #171B21;
+    --ink-soft: #4C5560;
+    --ink-faint: #838D99;
+    --accent: #C1552A;
+    --accent-ink: #7A3115;
+    --accent2: #1F7A63;
+    --accent2-ink: #144F40;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { background: var(--bg); }
+
+  body {
+    margin: 0;
+    color: var(--ink);
+    background: var(--bg);
+    font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, 'Noto Serif TC', serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sheet {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 40px 24px 96px;
+  }
+
+  .mono {
+    font-family: 'Cascadia Code', 'SFMono-Regular', Consolas, ui-monospace, monospace;
+  }
+
+  .eyebrow {
+    font-family: 'Segoe UI Semibold', 'Bahnschrift', 'Microsoft JhengHei', system-ui, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Segoe UI Semibold', 'Bahnschrift', 'Microsoft JhengHei', system-ui, sans-serif;
+    text-wrap: balance;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* ---------- Title block (fixed blueprint panel, same in both themes) ---------- */
+  .titleblock {
+    background: var(--tb-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .titleblock::before,
+  .titleblock::after,
+  .titleblock .reg-tl,
+  .titleblock .reg-tr {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--tb-accent);
+    opacity: 0.85;
+  }
+  .titleblock::before { top: 12px; left: 12px; border-right: none; border-bottom: none; }
+  .titleblock::after { top: 12px; right: 12px; border-left: none; border-bottom: none; }
+
+  .titleblock-main {
+    padding: 40px 34px 30px;
+  }
+
+  .titleblock-main h1 {
+    margin: 12px 0 8px;
+    font-size: clamp(1.7rem, 4vw, 2.5rem);
+    line-height: 1.18;
+    color: var(--tb-ink);
+  }
+
+  .titleblock-sub {
+    color: var(--tb-ink-soft);
+    font-size: 1.05rem;
+    max-width: 56ch;
+  }
+
+  .titleblock .eyebrow { color: var(--tb-accent); }
+
+  .titleblock-fields {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--tb-line);
+    background: var(--tb-bg-2);
+  }
+
+  .field {
+    padding: 14px 20px;
+    border-right: 1px solid var(--tb-line);
+  }
+  .field:last-child { border-right: none; }
+
+  .field-label {
+    font-family: 'Segoe UI Semibold', 'Bahnschrift', 'Microsoft JhengHei', system-ui, sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--tb-ink-soft);
+    margin-bottom: 4px;
+  }
+
+  .field-value {
+    font-family: 'Cascadia Code', Consolas, ui-monospace, monospace;
+    font-size: 0.85rem;
+    color: var(--tb-ink);
+  }
+
+  /* ---------- Sections ---------- */
+  section {
+    margin-top: 60px;
+  }
+
+  section > .eyebrow {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  section > h2 {
+    font-size: 1.5rem;
+    margin: 0 0 18px;
+  }
+
+  .lede {
+    color: var(--ink-soft);
+    max-width: 66ch;
+    font-size: 1.05rem;
+  }
+
+  /* ---------- Three "is-not" cards ---------- */
+  .not-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .not-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 18px 18px 20px;
+  }
+
+  .not-card .strike {
+    font-family: 'Segoe UI Semibold', 'Microsoft JhengHei', system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: line-through;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+    color: var(--ink-faint);
+  }
+
+  .not-card p {
+    margin: 8px 0 0;
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+  }
+
+  .is-banner {
+    margin-top: 16px;
+    background: var(--surface-well);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent2);
+    border-radius: 4px;
+    padding: 16px 20px;
+    font-size: 1rem;
+  }
+  .is-banner b { color: var(--accent2-ink); }
+
+  /* ---------- Mechanism diagram ---------- */
+  .mechanisms {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-top: 28px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .mech {
+    padding: 22px 18px;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .mech:last-child { border-right: none; }
+
+  .mech-num {
+    font-family: 'Cascadia Code', Consolas, monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .mech h3 {
+    font-size: 0.98rem;
+    margin: 8px 0 8px;
+    line-height: 1.35;
+  }
+
+  .mech p {
+    font-size: 0.84rem;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .mech-arrow {
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    transform: translate(50%, -50%);
+    width: 18px;
+    height: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    z-index: 2;
+  }
+
+  /* ---------- Page anatomy ---------- */
+  .anatomy-wrap {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 22px;
+    margin-top: 28px;
+    align-items: start;
+  }
+
+  @media (max-width: 720px) {
+    .anatomy-wrap, .not-grid, .mechanisms, .split-lanes, .compare-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .mech { border-right: none; border-bottom: 1px solid var(--border); }
+    .mech:last-child { border-bottom: none; }
+    .mech-arrow { display: none; }
+    .titleblock-fields { grid-template-columns: 1fr; }
+    .field { border-right: none; border-bottom: 1px solid var(--tb-line); }
+    .field:last-child { border-bottom: none; }
+  }
+
+  .anatomy-card {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .anatomy-head {
+    padding: 14px 18px;
+    background: var(--surface-well);
+    border-bottom: 1px solid var(--border);
+    font-family: 'Segoe UI Semibold', 'Microsoft JhengHei', system-ui, sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+
+  .anatomy-row {
+    display: grid;
+    grid-template-columns: 108px 1fr;
+    gap: 14px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .anatomy-row:last-child { border-bottom: none; }
+
+  .anatomy-row .tag {
+    font-family: 'Cascadia Code', Consolas, monospace;
+    font-size: 0.72rem;
+    color: var(--accent2-ink);
+    background: color-mix(in srgb, var(--accent2) 18%, transparent);
+    border-radius: 3px;
+    padding: 3px 6px;
+    height: fit-content;
+    white-space: nowrap;
+  }
+
+  .anatomy-row p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ink);
+  }
+
+  .anatomy-note {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+  .anatomy-note h3 {
+    font-size: 1rem;
+    margin: 0 0 10px;
+  }
+  .anatomy-note ul {
+    padding-left: 1.1em;
+    margin: 0;
+  }
+  .anatomy-note li { margin-bottom: 8px; }
+
+  /* ---------- Split lanes: main line / backup content / index table ---------- */
+  .split-lanes {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 18px;
+    margin-top: 28px;
+  }
+
+  .lane {
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .lane-head {
+    padding: 12px 16px;
+    font-family: 'Segoe UI Semibold', 'Microsoft JhengHei', system-ui, sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+  }
+
+  .lane.main .lane-head {
+    background: color-mix(in srgb, var(--accent2) 20%, var(--surface));
+    color: var(--accent2-ink);
+  }
+  .lane.choice .lane-head {
+    background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+    color: var(--accent-ink);
+  }
+  .lane.index .lane-head {
+    background: var(--surface-well);
+    color: var(--ink-soft);
+  }
+
+  .lane-body {
+    background: var(--surface);
+    padding: 16px;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+
+  .lane-body .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0;
+  }
+
+  .chip {
+    font-family: 'Cascadia Code', Consolas, monospace;
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    color: var(--ink-soft);
+  }
+  .lane.main .chip {
+    border-color: color-mix(in srgb, var(--accent2) 45%, var(--border));
+  }
+  .lane.choice .chip {
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  }
+
+  /* ---------- Before / after compare ---------- */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 28px;
+  }
+
+  .compare-col {
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .compare-head {
+    padding: 12px 16px;
+    font-family: 'Segoe UI Semibold', 'Microsoft JhengHei', system-ui, sans-serif;
+    font-size: 0.85rem;
+  }
+  .compare-col.bad .compare-head { color: var(--accent-ink); background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
+  .compare-col.good .compare-head { color: var(--accent2-ink); background: color-mix(in srgb, var(--accent2) 18%, var(--surface)); }
+
+  .compare-col ol {
+    margin: 0;
+    padding: 16px 16px 16px 34px;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+  .compare-col li { margin-bottom: 10px; }
+
+  /* ---------- Checklist ---------- */
+  .checklist {
+    margin-top: 24px;
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+
+  .checklist li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 16px;
+    font-size: 0.92rem;
+  }
+
+  .checklist .box {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin-top: 3px;
+    border: 1.5px solid var(--accent2);
+    border-radius: 3px;
+  }
+
+  footer {
+    margin-top: 72px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--ink-faint);
+    font-size: 0.82rem;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  code.inline {
+    font-family: 'Cascadia Code', Consolas, monospace;
+    background: var(--surface-well);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 0.86em;
+    color: var(--ink);
+  }
+</style>
+
+<div class="sheet">
+
+  <div class="titleblock">
+    <div class="titleblock-main">
+      <span class="eyebrow">概念藍圖 · Presentation Flow Document</span>
+      <h1>簡報流程檔不是逐字稿，<br>是寫給生成 AI 的施工圖</h1>
+      <p class="titleblock-sub">
+        一份結構化文件，把敘事決策、每頁任務、視覺原則一次交代清楚，
+        讓簡報生成 AI 代理能長時間產出不中斷，也不會重複做白工。
+      </p>
+    </div>
+    <div class="titleblock-fields">
+      <div class="field">
+        <div class="field-label">來源案例</div>
+        <div class="field-value">AI 開發講堂#03 · 24 頁</div>
+      </div>
+      <div class="field">
+        <div class="field-label">交付對象</div>
+        <div class="field-value">簡報生成 AI 代理</div>
+      </div>
+      <div class="field">
+        <div class="field-label">對應 Skill</div>
+        <div class="field-value">presentation-flow-writer</div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <span class="eyebrow">01 · 先定義它不是什麼</span>
+    <h2>三個常見誤解</h2>
+    <p class="lede">大部分人準備簡報素材時，寫出來的其實是這三種東西之一——但流程檔刻意都不是。</p>
+    <div class="not-grid">
+      <div class="not-card">
+        <div class="strike">逐字稿</div>
+        <p>不寫「講者要唸的每一句話」，講者重點只給提示方向，留空間讓現場自然發揮。</p>
+      </div>
+      <div class="not-card">
+        <div class="strike">最終投影片文案</div>
+        <p>不預先寫死每頁標題與內文，把「寫什麼字」的決定權留給生成代理去選擇視覺表現。</p>
+      </div>
+      <div class="not-card">
+        <div class="strike">條列大綱</div>
+        <p>不是把所有想講的內容攤平列點，而是先分出「敘事節奏」再分派到每一頁。</p>
+      </div>
+    </div>
+    <div class="is-banner">
+      它<b>是</b>：一份結構化輸入，讓生成代理知道「敘事節奏」「每頁任務」「畫面安排方向」「該用案例還是條列」——把控制流程的責任從 Prompt 現場發揮，搬到文件先決策。
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">02 · 為什麼能不中斷、不重工</span>
+    <h2>四個機制</h2>
+    <p class="lede">長任務最常見的失敗模式，是生成代理必須在過程中不斷停下來問「這頁要怎麼處理」。流程檔把這些追問提前擋掉。</p>
+    <div class="mechanisms">
+      <div class="mech">
+        <span class="mech-num">M1</span>
+        <h3>敘事決策一次做完</h3>
+        <p>核心主軸、3-5 段節奏、頁數與時間分配全部先定案，生成當下不用重新判斷「這場分享要講什麼」。</p>
+        <span class="mech-arrow">→</span>
+      </div>
+      <div class="mech">
+        <span class="mech-num">M2</span>
+        <h3>每頁任務原子化</h3>
+        <p>目的、核心訊息、畫面安排、講者重點、可引用素材五要素獨立成塊，每頁可以單獨生成，不必等待全域重新對齊。</p>
+        <span class="mech-arrow">→</span>
+      </div>
+      <div class="mech">
+        <span class="mech-num">M3</span>
+        <h3>主線、索引表、備用頁三者分流</h3>
+        <p>正文一定要生成；導航索引表一律不生成；備用頁內容要不要先生成，交由使用者決定——三件事各自獨立，不會互相牽連。</p>
+        <span class="mech-arrow">→</span>
+      </div>
+      <div class="mech">
+        <span class="mech-num">M4</span>
+        <h3>風格與禁區提前講清楚</h3>
+        <p>文字密度、圖像類型、動畫原則、避免事項一次列完，每頁不必重新猜測「這樣做符合風格嗎」。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">03 · 拆解一頁的解剖圖</span>
+    <h2>每頁只做五件事</h2>
+    <p class="lede">用來源案例第 9 頁「Hook 的實務配置」為例——完整用上全部五個欄位，是典型的五要素頁面結構。</p>
+    <div class="anatomy-wrap">
+      <div class="anatomy-card">
+        <div class="anatomy-head">第 9 頁：Hook 的實務配置：User-scope 與 Project-scope</div>
+        <div class="anatomy-row">
+          <span class="tag">目的</span>
+          <p>讓聽眾知道 Hook 規則要放在哪個層級，而不是只知道「Hook 可以做什麼」。</p>
+        </div>
+        <div class="anatomy-row">
+          <span class="tag">核心訊息</span>
+          <p>Hook 不是寫在同一個地方，規則放的層級會決定它的適用範圍。</p>
+        </div>
+        <div class="anatomy-row">
+          <span class="tag">畫面安排</span>
+          <p>左欄／上層是 User-scope，標註「跨專案共用規則」；右欄／下層是 Project-scope，標註「只屬於特定專案的流程」。</p>
+        </div>
+        <div class="anatomy-row">
+          <span class="tag">講者重點</span>
+          <p>讓聽眾建立分層概念：共用規則往 User-scope 放，專案限定規則往 Project-scope 放，避免規則重複執行。</p>
+        </div>
+        <div class="anatomy-row">
+          <span class="tag">可引用素材</span>
+          <p>可參考 <code class="inline">Hooks.md</code>——生成代理不用憑空發想案例。</p>
+        </div>
+      </div>
+      <div class="anatomy-note">
+        <h3>為什麼是這五格，不是更多</h3>
+        <ul>
+          <li><b>目的</b>限制了這頁「為什麼存在」，避免變成塞資訊的容器。</li>
+          <li><b>核心訊息</b>逼出「一句結論」，對應「每頁只承載一個主要結論」的畫面原則。</li>
+          <li><b>畫面安排</b>只給結構方向（例如左右對比），把具體視覺表現的自由留給生成代理。</li>
+          <li><b>講者重點</b>是給人看的，不是給生成代理畫的，但保留下來讓文件同時服務兩種讀者。</li>
+          <li><b>可引用素材</b>把查證責任轉嫁給既有文件，生成代理不必臨場編造案例細節。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">04 · 三條分流的內容線</span>
+    <h2>主線一定生成，索引表一定不生成，備用頁內容由你決定</h2>
+    <p class="lede">來源案例的 24 頁正文之外，另外準備了 11 個備用頁題目——但「要不要把備用頁內容也先生成出來」是使用者自己的選擇，不是這個格式規定的省工手段；唯一沒有例外的是那張導航索引表，它一律不會被做成投影片。</p>
+    <div class="split-lanes">
+      <div class="lane main">
+        <div class="lane-head">主線 · 一定要生成</div>
+        <div class="lane-body">
+          正文 24 頁，逐頁都有完整五要素，依敘事節奏排定順序，是簡報生成的必產內容。
+          <div class="chip-row">
+            <span class="chip">第 1-5 頁 痛點與轉折</span>
+            <span class="chip">第 6-11 頁 Hooks</span>
+            <span class="chip">第 12-17 頁 Subagents</span>
+            <span class="chip">第 18-22 頁 案例與 Demo</span>
+            <span class="chip">第 23-24 頁 收尾</span>
+          </div>
+        </div>
+      </div>
+      <div class="lane choice">
+        <div class="lane-head">備用頁內容 · 由你決定</div>
+        <div class="lane-body">
+          聽眾問了能直接切過去、時間夠也能多講——想先備好就跟正文頁一樣填五要素，想留到現場才決定也可以，兩種都合理。
+          <div class="chip-row">
+            <span class="chip">先生成備用</span>
+            <span class="chip">現場再決定</span>
+          </div>
+        </div>
+      </div>
+      <div class="lane index">
+        <div class="lane-head">索引表 · 一律不生成</div>
+        <div class="lane-body">
+          只記錄「對應正文頁」「觸發情境」「優先權重」，純粹是講者自己臨場導航用的清單，不會交給生成 AI 產出對應投影片。
+          <div class="chip-row">
+            <span class="chip">觸發情境</span>
+            <span class="chip">對應正文頁</span>
+            <span class="chip">優先權重</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">05 · 對照</span>
+    <h2>沒有流程檔 vs 有流程檔</h2>
+    <div class="compare-grid">
+      <div class="compare-col bad">
+        <div class="compare-head">逐頁現場下指令</div>
+        <ol>
+          <li>每頁都要重新解釋這場分享的主軸是什麼</li>
+          <li>視覺風格全靠生成代理臨場猜，前後容易不一致</li>
+          <li>案例頁常常只秀成果，漏掉風險與驗證過程</li>
+          <li>對話一長就開始忘記前面已經定調的敘事</li>
+          <li>QA 備用內容跟正文混在一起，生成時間被拉長</li>
+        </ol>
+      </div>
+      <div class="compare-col good">
+        <div class="compare-head">先寫一份簡報流程檔</div>
+        <ol>
+          <li>核心敘事、節奏、頁數在文件開頭一次定案</li>
+          <li>畫面原則與禁區寫成規則，風格從頭到尾一致</li>
+          <li>案例頁明確要求「風險 → 設計機制 → 驗證方式」</li>
+          <li>每頁任務獨立成塊，生成不必依賴對話記憶</li>
+          <li>備用頁另建索引表導航，內容要不要先生成是你的選擇，不強制也不禁止</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">06 · 開始動手</span>
+    <h2>自己的簡報，也能走同一條路</h2>
+    <p class="lede">呼叫 <code class="inline">presentation-flow-writer</code> 這個 Skill，會依序引導你填出以下七塊，最後收斂成一段可以直接交給生成代理的 Prompt。</p>
+    <ul class="checklist">
+      <li><span class="box"></span> 一句話寫下核心敘事主軸，以及希望聽眾帶走的思維轉變</li>
+      <li><span class="box"></span> 把分享拆成 3-5 段節奏，並抓出各段的時間與頁數預算</li>
+      <li><span class="box"></span> 訂出畫面原則與明確的「避免事項」清單</li>
+      <li><span class="box"></span> 逐頁填五要素：目的、核心訊息、畫面安排、講者重點、可引用素材</li>
+      <li><span class="box"></span> 另建備用頁索引表（一律不生成），並決定備用頁內容要不要也先做出來</li>
+      <li><span class="box"></span> 彙整給生成代理的版面指示：整體風格、圖像類型建議、動畫原則</li>
+      <li><span class="box"></span> 收尾寫一段交付說明，連同完整流程檔一起交給生成代理</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>依內附範例 <code class="inline">example-ai-workshop-03.md</code>（AI 開發講堂#03）萃取而成</span>
+    <span class="mono">presentation-flow-writer skill</span>
+  </footer>
+
+</div>

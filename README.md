@@ -13,6 +13,9 @@
 │     ├─ commit-push-pr/SKILL.md
 │     ├─ doc-coauthoring/SKILL.md
 │     ├─ find-skills/SKILL.md
+│     ├─ presentation-flow-writer/
+│     │  ├─ SKILL.md
+│     │  └─ references/
 │     ├─ review/SKILL.md
 │     ├─ simple-sdd/SKILL.md
 │     └─ test/SKILL.md
@@ -68,6 +71,7 @@
   - `commit-push-pr/SKILL.md`：依目前工作區變更建立提交、推送並建立 Pull Request。
   - `doc-coauthoring/SKILL.md`：協助撰寫與共同編輯文件、提案、技術規格與決策文件。
   - `find-skills/SKILL.md`：協助搜尋、挑選與安裝可用 skills（`npx skills find/add/check/update`）。
+  - `presentation-flow-writer/SKILL.md`：陪同使用者共同撰寫「簡報流程檔」，作為交給簡報生成 AI 代理的結構化輸入文件（含 `references/` 範例與模板）。
   - `review/SKILL.md`：對目前工作目錄中的變更做嚴格技術審查，優先指出 bug、風險、回歸與測試缺口。
   - `simple-sdd/SKILL.md`：輕量級 SDD 開發流程，分「提案 → 實作 → 歸檔」三階段，動手寫程式前先確認需求並取得使用者同意。
   - `test/SKILL.md`：執行現有測試、分析失敗原因，並在必要時補充關鍵測試以驗證程式碼正確性。
